@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "404451208967",
+    "project_id": "carently-94153",
+    "storage_bucket": "carently-94153.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:404451208967:android:0f282a1bbf2457d4f05fa2",
+        "android_client_info": {
+          "package_name": "com.example.carrently"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD2d45fnPurgofuw8zbHrPN3PYySuThB1Q"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
