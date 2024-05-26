@@ -34,7 +34,7 @@ class LoginPage extends StatefulWidget{
     try {
       await Auth().createUserWithEmailAndPassword(
         email: _controllerEmail.text,
-        password: _controllerEmail.text,
+        password: _controllerPassword.text,
         );
     } on FirebaseAuthException catch (e) {
       setState(() {
