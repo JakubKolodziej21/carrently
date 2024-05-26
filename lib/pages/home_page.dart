@@ -16,13 +16,13 @@ class HomePage extends StatelessWidget {
   }
 
   Widget _userUid() {
-    return Text(user?.email ?? 'User email');
+    return Text(user?.email ?? 'Adres email użytkownika');
   }
 
   Widget _signOutButton() {
     return ElevatedButton(
       onPressed: signOut,
-      child: const Text('Sign Out'),
+      child: const Text('Wyloguj się'),
       );
   }
 
