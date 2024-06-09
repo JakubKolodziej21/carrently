@@ -53,12 +53,12 @@ class _WelcomePageState extends State<WelcomePage> {
                   Container(
                     child: Image.asset('assets/images/logo_white.png', height: 300, width: 300), // Adjust height and width as needed
                   ),
-                  SizedBox(height: 20),
+                  SizedBox(height: 30),
                   Column(
                     children: [
                       Text(
                         'Witaj w aplikacji,',
-                        style: TextStyle(fontSize: 30),
+                        style: TextStyle(fontWeight:FontWeight.w600,fontSize: 30),
                       ),
                       Text.rich(
                         TextSpan(
@@ -69,7 +69,7 @@ class _WelcomePageState extends State<WelcomePage> {
                             ),
                             TextSpan(
                               text: 'Rently',
-                              style: TextStyle(fontSize: 48, color: Colors.blue),
+                              style: TextStyle(fontSize: 48,  color: Colors.blue),
                             ),
                           ],
                         ),
@@ -82,7 +82,7 @@ class _WelcomePageState extends State<WelcomePage> {
             Positioned(
               left: 0,
               right: 0,
-              bottom: 35,
+              bottom: 60,
               child: Container(
                 alignment: Alignment.center,
                 margin: const EdgeInsets.only(left: 40.0, right: 40.0),
@@ -97,7 +97,7 @@ class _WelcomePageState extends State<WelcomePage> {
                       ),
                       shape: MaterialStateProperty.all<RoundedRectangleBorder>(
                         RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8.5), // 17% of 50 is approximately 8.5
+                          borderRadius: BorderRadius.circular(10), // 17% of 50 is approximately 8.5
                         ),
                       ),
                     ),
@@ -109,7 +109,7 @@ class _WelcomePageState extends State<WelcomePage> {
                     },
                     child: const Text(
                       'Zaloguj się',
-                      style: TextStyle(fontSize: 40.0, color: Color.fromARGB(255, 250, 250, 250)),
+                      style: TextStyle(fontSize: 35.0, color: Color.fromARGB(255, 250, 250, 250)),
                     ),
                   ),
                 ),
