@@ -1,9 +1,10 @@
 import 'package:carrently/auth.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 
 class LoginPage extends StatefulWidget {
-  const LoginPage({super.key});
+  const LoginPage({Key? key}) : super(key: key);
 
   @override
   State<LoginPage> createState() => _LoginPageState();
@@ -24,7 +25,7 @@ class _LoginPageState extends State<LoginPage> {
       );
     } on FirebaseAuthException catch (e) {
       setState(() {
-        errorMessage = e.message;
+        errorMessage = getFirebaseErrorMessage(e.code);
       });
       _showErrorDialog();
     }
@@ -38,7 +39,7 @@ class _LoginPageState extends State<LoginPage> {
       );
     } on FirebaseAuthException catch (e) {
       setState(() {
-        errorMessage = e.message;
+        errorMessage = getFirebaseErrorMessage(e.code);
       });
       _showErrorDialog();
     }
@@ -71,8 +72,10 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   Widget _title() {
-    return const Text('Firebase Auth');
+    return Text(isLogin ? 'Logowanie' : 'Rejestracja');
   }
+
+
 
   Widget _entryField(
     String title,
@@ -101,8 +104,14 @@ class _LoginPageState extends State<LoginPage> {
 
   Widget _submitButton() {
     return ElevatedButton(
-      onPressed:
-          isLogin ? signInWithEmailAndPassword : createUserWithEmailAndPassword,
+      onPressed: isLogin ? signInWithEmailAndPassword : createUserWithEmailAndPassword,
+      style: ElevatedButton.styleFrom(
+        foregroundColor: Colors.white, backgroundColor: Colors.blue, // Set the text color
+        padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 30), // Set the button padding
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(30), // Set the button border radius
+        ),
+      ),
       child: Text(isLogin ? 'Zaloguj się' : 'Utwórz konto'),
     );
   }
@@ -114,6 +123,9 @@ class _LoginPageState extends State<LoginPage> {
           isLogin = !isLogin;
         });
       },
+      style: TextButton.styleFrom(
+        foregroundColor: Colors.blue, // Set the button text color
+      ),
       child: Text(isLogin ? 'Zarejestruj się' : 'Mam już konto'),
     );
   }
@@ -132,13 +144,34 @@ class _LoginPageState extends State<LoginPage> {
           crossAxisAlignment: CrossAxisAlignment.center,
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            _entryField('email', _controllerEmail),
-            _entryPasswordField('hasło', _controllerPassword),
+            _entryField('E-mail', _controllerEmail),
+            _entryPasswordField('Hasło', _controllerPassword),
+            const SizedBox(height: 20),
             _submitButton(),
+            const SizedBox(height: 10),
             _loginOrRegisterButton(),
           ],
         ),
       ),
     );
+  }
+}
+
+String getFirebaseErrorMessage(String errorCode) {
+  switch (errorCode) {
+    case 'user-not-found':
+      return 'Nie znaleziono użytkownika dla podanego adresu e-mail';
+    case 'wrong-password':
+      return 'Nieprawidłowe hasło';
+    case 'email-already-in-use':
+      return 'Adres e-mail jest już używany';
+    case 'invalid-email':
+      return 'Nieprawidłowy format adresu e-mail';
+    case 'operation-not-allowed':
+      return 'Ta operacja nie jest dozwolona';
+    case 'weak-password':
+      return 'Hasło jest zbyt słabe';
+    default:
+      return 'Wystąpił nieznany błąd. Spróbuj ponownie później.';
   }
 }
