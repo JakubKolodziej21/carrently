@@ -1,6 +1,7 @@
 import 'package:carrently/auth.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:table_calendar/table_calendar.dart';
 
 class HomePage extends StatelessWidget {
   HomePage({super.key});
@@ -23,13 +24,20 @@ class HomePage extends StatelessWidget {
     return ElevatedButton(
       onPressed: signOut,
       child: const Text('Wyloguj się'),
-      );
+    );
+  }
+
+  Widget _calendar() {
+    return TableCalendar(
+      firstDay: DateTime.utc(2010, 10, 16),
+      lastDay: DateTime.utc(2030, 3, 14),
+      focusedDay: DateTime.now(),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-
       appBar: AppBar(
         title: _title(),
       ),
@@ -38,15 +46,17 @@ class HomePage extends StatelessWidget {
         width: double.infinity,
         padding: const EdgeInsets.all(20),
         child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-                _userUid(),
-                _signOutButton(),
-            ],
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            _userUid(),
+            const SizedBox(height: 20),
+            _calendar(),  // Display the calendar here
+            const SizedBox(height: 20),
+            _signOutButton(),
+          ],
         ),
-        ),
-
+      ),
     );
   }
 }

@@ -45,6 +45,18 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
+  Future<void> sendPasswordResetEmail(String email) async {
+    try {
+      await FirebaseAuth.instance.sendPasswordResetEmail(email: email);
+      _showMessageDialog('Wysłano e-mail z resetowaniem hasła.');
+    } on FirebaseAuthException catch (e) {
+      setState(() {
+        errorMessage = getFirebaseErrorMessage(e.code);
+      });
+      _showErrorDialog();
+    }
+  }
+
   void _showErrorDialog() {
     if (errorMessage == null || errorMessage!.isEmpty) {
       return;
@@ -71,34 +83,40 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
+  void _showMessageDialog(String message) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Informacja'),
+          content: Text(message),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('OK'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   Widget _title() {
     return Text(isLogin ? 'Logowanie' : 'Rejestracja');
   }
 
-
-
-  Widget _entryField(
-    String title,
-    TextEditingController controller,
-  ) {
+  Widget _entryField(String title, TextEditingController controller) {
     return TextField(
       controller: controller,
-      decoration: InputDecoration(
-        labelText: title,
-      ),
+      decoration: InputDecoration(labelText: title),
     );
   }
 
-  Widget _entryPasswordField(
-    String title,
-    TextEditingController controller,
-  ) {
+  Widget _entryPasswordField(String title, TextEditingController controller) {
     return TextField(
       controller: controller,
-      decoration: InputDecoration(
-        labelText: title,
-      ),
       obscureText: true,
+      decoration: InputDecoration(labelText: title),
     );
   }
 
@@ -106,10 +124,11 @@ class _LoginPageState extends State<LoginPage> {
     return ElevatedButton(
       onPressed: isLogin ? signInWithEmailAndPassword : createUserWithEmailAndPassword,
       style: ElevatedButton.styleFrom(
-        foregroundColor: Colors.white, backgroundColor: Colors.blue, // Set the text color
-        padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 30), // Set the button padding
+        foregroundColor: Colors.white,
+        backgroundColor: Colors.blue,
+        padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 30),
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(30), // Set the button border radius
+          borderRadius: BorderRadius.circular(30),
         ),
       ),
       child: Text(isLogin ? 'Zaloguj się' : 'Utwórz konto'),
@@ -124,9 +143,34 @@ class _LoginPageState extends State<LoginPage> {
         });
       },
       style: TextButton.styleFrom(
-        foregroundColor: Colors.blue, // Set the button text color
+        foregroundColor: Colors.blue,
       ),
       child: Text(isLogin ? 'Zarejestruj się' : 'Mam już konto'),
+    );
+  }
+
+  Widget _resetPasswordButton() {
+    return Align(
+      alignment: Alignment.centerRight,
+      child: TextButton(
+        onPressed: () {
+          if (_controllerEmail.text.isEmpty) {
+            setState(() {
+              errorMessage = 'Wprowadź adres e-mail, aby zresetować hasło.';
+            });
+            _showErrorDialog();
+          } else {
+            sendPasswordResetEmail(_controllerEmail.text);
+          }
+        },
+        style: TextButton.styleFrom(
+          foregroundColor: Colors.blue,
+        ),
+        child: Text(
+          'Zapomniałeś hasła?',
+          style: TextStyle(fontSize: 14),
+        ),
+      ),
     );
   }
 
@@ -137,8 +181,6 @@ class _LoginPageState extends State<LoginPage> {
         title: _title(),
       ),
       body: Container(
-        height: double.infinity,
-        width: double.infinity,
         padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
@@ -146,6 +188,8 @@ class _LoginPageState extends State<LoginPage> {
           children: <Widget>[
             _entryField('E-mail', _controllerEmail),
             _entryPasswordField('Hasło', _controllerPassword),
+            const SizedBox(height: 8), // Adjusted spacing
+            _resetPasswordButton(),
             const SizedBox(height: 20),
             _submitButton(),
             const SizedBox(height: 10),
