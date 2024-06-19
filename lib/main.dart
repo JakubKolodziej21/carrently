@@ -29,7 +29,8 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.orange,
         ),
-        home: const WelcomePage(title: ''),
+        //TODO: Add welcome page functionality
+        home: const WidgetTree(),
     );
 }
 }
