@@ -51,7 +51,8 @@ class HomePage extends StatelessWidget {
           children: <Widget>[
             _userUid(),
             const SizedBox(height: 20),
-            _calendar(),  // Display the calendar here
+
+            //_calendar(),  // Display the calendar here
             const SizedBox(height: 20),
             _signOutButton(),
           ],
