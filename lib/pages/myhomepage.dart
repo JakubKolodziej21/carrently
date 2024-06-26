@@ -19,9 +19,7 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
     screens = [
-      CarsListPage(cars: [ Car(make: 'Toyota', model: 'Corolla', year: 2020, pricePerDay: 30, imageUrl: 'assets/images/toyota_corolla.jpg'),
-  Car(make: 'Honda', model: 'Civic', year: 2019, pricePerDay: 28, imageUrl: 'assets/images/honda_civic.jpg'),
-  Car(make: 'Ford', model: 'Mustang', year: 2021, pricePerDay: 45, imageUrl: 'assets/images/ford_mustang.jpg'),],),
+      CarsListScreen(),
       HomePage(),
       HomePage(),
       
