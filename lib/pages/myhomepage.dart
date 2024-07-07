@@ -1,6 +1,7 @@
 
 import 'package:carrently/pages/cars.dart';
 import 'package:carrently/pages/home_page.dart';
+import 'package:carrently/pages/settings.dart';
 import 'package:flutter/material.dart';
 
 
@@ -21,7 +22,7 @@ class _MyHomePageState extends State<MyHomePage> {
     screens = [
       CarsListScreen(),
       HomePage(),
-      HomePage(),
+      SettingsScreen(),
       
     ];
     super.initState();
