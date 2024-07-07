@@ -1,5 +1,5 @@
 import 'package:carrently/firebase_options.dart';
-import 'package:carrently/pages/home_page.dart';
+import 'package:carrently/pages/rentals_screen_page.dart';
 import 'package:carrently/pages/myhomepage.dart';
 import 'package:carrently/pages/welcome_page.dart';
 import 'package:carrently/widget_tree.dart';

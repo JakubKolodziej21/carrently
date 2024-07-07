@@ -1,5 +1,5 @@
 import 'package:carrently/auth.dart';
-import 'package:carrently/pages/home_page.dart';
+import 'package:carrently/pages/rentals_screen_page.dart';
 import 'package:carrently/pages/login_register_page.dart';
 import 'package:carrently/pages/myhomepage.dart';
 import 'package:flutter/material.dart';
