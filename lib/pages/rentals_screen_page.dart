@@ -3,8 +3,6 @@ import 'package:carrently/models/rentals.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-
-
 class RentalsScreen extends StatelessWidget {
   final FirebaseFirestore firestore = FirebaseFirestore.instance;
   final String? userId = getUserId();
@@ -21,13 +19,10 @@ class RentalsScreen extends StatelessWidget {
           if (snapshot.hasError) {
             return Text('Wystąpił błąd');
           }
-
           if (snapshot.connectionState == ConnectionState.waiting) {
             return CircularProgressIndicator();
           }
-
           var rentalsList = snapshot.data!.docs.map((doc) => Rental.fromFirestore(doc.data() as Map<String, dynamic>)).toList();
-
           return ListView.builder(
             itemCount: rentalsList.length,
             itemBuilder: (context, index) {
@@ -39,6 +34,14 @@ class RentalsScreen extends StatelessWidget {
             },
           );
         },
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          // Here, you can navigate to a new page or open a dialog
+         // Navigator.push(context, MaterialPageRoute(builder: (context) => NewRentalScreen()));
+        },
+        tooltip: 'Dodaj rezerwację',
+        child: Icon(Icons.add),
       ),
     );
   }
