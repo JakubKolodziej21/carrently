@@ -108,7 +108,15 @@ class _LoginPageState extends State<LoginPage> {
   Widget _entryField(String title, TextEditingController controller) {
     return TextField(
       controller: controller,
-      decoration: InputDecoration(labelText: title),
+      decoration: InputDecoration(
+        labelText: title,
+        filled: true,
+        fillColor: Colors.white,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: BorderSide.none,
+        ),
+      ),
     );
   }
 
@@ -116,7 +124,15 @@ class _LoginPageState extends State<LoginPage> {
     return TextField(
       controller: controller,
       obscureText: true,
-      decoration: InputDecoration(labelText: title),
+      decoration: InputDecoration(
+        labelText: title,
+        filled: true,
+        fillColor: Colors.white,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: BorderSide.none,
+        ),
+      ),
     );
   }
 
@@ -125,7 +141,7 @@ class _LoginPageState extends State<LoginPage> {
       onPressed: isLogin ? signInWithEmailAndPassword : createUserWithEmailAndPassword,
       style: ElevatedButton.styleFrom(
         foregroundColor: Colors.white,
-        backgroundColor: Colors.blue,
+        backgroundColor: const Color.fromARGB(255, 243, 163, 33),
         padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 30),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(30),
@@ -143,7 +159,7 @@ class _LoginPageState extends State<LoginPage> {
         });
       },
       style: TextButton.styleFrom(
-        foregroundColor: Colors.blue,
+        foregroundColor: const Color.fromARGB(255, 255, 255, 255),
       ),
       child: Text(isLogin ? 'Zarejestruj się' : 'Mam już konto'),
     );
@@ -164,7 +180,7 @@ class _LoginPageState extends State<LoginPage> {
           }
         },
         style: TextButton.styleFrom(
-          foregroundColor: Colors.blue,
+          foregroundColor: const Color.fromARGB(255, 243, 156, 33),
         ),
         child: Text(
           'Zapomniałeś hasła?',
@@ -181,14 +197,27 @@ class _LoginPageState extends State<LoginPage> {
         title: _title(),
       ),
       body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [const Color.fromARGB(255, 110, 179, 236), Colors.lightBlueAccent],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+        ),
         padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
+            Image.asset(
+              'assets/images/logo_white.png', // Ensure your logo is placed in the assets folder and mentioned in pubspec.yaml
+              height: 300,
+            ),
+            const SizedBox(height: 20),
             _entryField('E-mail', _controllerEmail),
+            const SizedBox(height: 10),
             _entryPasswordField('Hasło', _controllerPassword),
-            const SizedBox(height: 8), // Adjusted spacing
+            const SizedBox(height: 8),
             _resetPasswordButton(),
             const SizedBox(height: 20),
             _submitButton(),
