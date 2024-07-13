@@ -1,5 +1,4 @@
-
-
+import 'package:carrently/auth.dart';
 import 'package:flutter/material.dart';
 
 class SettingsScreen extends StatelessWidget {
@@ -48,9 +47,22 @@ class SettingsScreen extends StatelessWidget {
                 // Dodaj logikę zmiany hasła i opcji bezpieczeństwa
               },
             ),
+            ListTile(
+              leading: Icon(Icons.logout),
+              title: Text('Wyloguj się'),
+              onTap: () async {
+                await signOut();
+                // Navigate to the login screen or show a confirmation message
+               // Navigator.of(context).pushReplacementNamed('/login'); // Make sure to replace '/login' with your actual login route
+              },
+            ),
           ],
         ).toList(),
       ),
     );
   }
+}
+
+Future<void> signOut() async {
+  await Auth().signOut();
 }
