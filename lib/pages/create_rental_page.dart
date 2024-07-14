@@ -1,8 +1,8 @@
 import 'package:carrently/models/car.dart';
-import 'package:carrently/models/rentals.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:carrently/auth.dart';  
+
 class CreateRentalScreen extends StatefulWidget {
   @override
   _CreateRentalScreenState createState() => _CreateRentalScreenState();
@@ -25,9 +25,9 @@ class _CreateRentalScreenState extends State<CreateRentalScreen> {
     var querySnapshot = await firestore.collection('cars').get();
     setState(() {
       cars = querySnapshot.docs.map((doc) {
-        var data = doc.data();
-        return data is Map<String, dynamic> ? Car.fromMap(data, doc.id) : null;
-      }).where((car) => car != null).cast<Car>().toList();
+        var data = doc.data() as Map<String, dynamic>;
+        return Car.fromMap(data, doc.id);
+      }).toList();
     });
   }
 
@@ -35,7 +35,7 @@ class _CreateRentalScreenState extends State<CreateRentalScreen> {
     final DateTime? picked = await showDatePicker(
       context: context,
       initialDate: isStartDate ? startDate ?? DateTime.now() : endDate ?? DateTime.now(),
-      firstDate: DateTime(2020),
+      firstDate: DateTime.now(), // Ensure no past dates are selectable
       lastDate: DateTime(2030),
     );
     if (picked != null) {
@@ -49,20 +49,52 @@ class _CreateRentalScreenState extends State<CreateRentalScreen> {
     }
   }
 
-  void createRental() async {
-    String? userId = getUserId(); // Uzyskaj ID zalogowanego użytkownika
-    if (selectedCar != null && startDate != null && endDate != null && userId != null) {
-      FirebaseFirestore firestore = FirebaseFirestore.instance;
-      await firestore.collection('rentals').add({
-        'car_id': selectedCar!.id,
-        'date_start': startDate!.toIso8601String(),
-        'date_end': endDate!.toIso8601String(),
-        'user_id': userId  // Użyj uzyskanego ID użytkownika
-      });
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Rental created successfully')));
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Please select all fields or log in')));
+ Future<bool> isCarAvailable() async {
+  if (selectedCar == null || startDate == null || endDate == null) return false;
+
+  try {
+    FirebaseFirestore firestore = FirebaseFirestore.instance;
+    var rentalsQuery = firestore.collection('rentals')
+      .where('car_id', isEqualTo: selectedCar!.id)
+      .where('date_end', isGreaterThan: startDate!.toIso8601String())
+      .where('date_start', isLessThan: endDate!.toIso8601String());
+
+    var querySnapshot = await rentalsQuery.get();
+    return querySnapshot.docs.isEmpty;
+  } catch (e) {
+    print("Error checking car availability: $e");
+    return false;
+  }
+}
+
+
+
+
+  Future<void> createRental() async {
+    if (selectedCar == null || startDate == null || endDate == null) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Please select all fields')));
+      return;
     }
+
+    if (endDate!.isBefore(startDate!)) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('End date must be after start date')));
+      return;
+    }
+
+    if (!await isCarAvailable()) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Car is already booked for selected dates')));
+      return;
+    }
+
+    String? userId = FirebaseAuth.instance.currentUser?.uid;
+    FirebaseFirestore firestore = FirebaseFirestore.instance;
+    await firestore.collection('rentals').add({
+      'car_id': selectedCar!.id,
+      'date_start': startDate!.toIso8601String(),
+      'date_end': endDate!.toIso8601String(),
+      'user_id': userId  // Use the obtained user ID
+    });
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Rental created successfully')));
   }
 
   @override
@@ -73,21 +105,23 @@ class _CreateRentalScreenState extends State<CreateRentalScreen> {
       ),
       body: SingleChildScrollView(
         child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            DropdownButton<Car>(
-              value: selectedCar,
-              onChanged: (Car? newValue) {
-                setState(() {
-                  selectedCar = newValue;
-                });
-              },
-              items: cars.map<DropdownMenuItem<Car>>((Car car) {
-                return DropdownMenuItem<Car>(
-                  value: car,
-                  child: Text("${car.brand} ${car.name} (${car.year})"),
-                );
-              }).toList(),
-            ),
+            if (cars.isNotEmpty) 
+              DropdownButton<Car>(
+                value: selectedCar,
+                onChanged: (Car? newValue) {
+                  setState(() {
+                    selectedCar = newValue;
+                  });
+                },
+                items: cars.map<DropdownMenuItem<Car>>((Car car) {
+                  return DropdownMenuItem<Car>(
+                    value: car,
+                    child: Text("${car.brand} ${car.name} (${car.year})"),
+                  );
+                }).toList(),
+              ),
             ElevatedButton(
               onPressed: () => _selectDate(context, isStartDate: true),
               child: Text('Select Start Date'),
