@@ -9,6 +9,6 @@ class FirestoreService {
     return _db.collection('cars')
         .snapshots()
         .map((snapshot) =>
-            snapshot.docs.map((doc) => Car.fromMap(doc.data() as Map<String, dynamic>, doc.id)).toList());
+            snapshot.docs.map((doc) => Car.fromMap(doc.data(), doc.id)).toList());
   }
 }

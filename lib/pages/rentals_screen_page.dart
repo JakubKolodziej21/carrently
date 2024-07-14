@@ -13,7 +13,7 @@ class RentalsScreen extends StatelessWidget {
     return firestore.collection('rentals').where('user_id', isEqualTo: userId).snapshots().asyncMap((snapshot) async {
       List<RentalWithCar> rentalsWithCars = [];
       for (var rentalSnapshot in snapshot.docs) {
-        var rentalData = Rental.fromFirestore(rentalSnapshot.data() as Map<String, dynamic>);
+        var rentalData = Rental.fromFirestore(rentalSnapshot.data());
         DocumentSnapshot carSnapshot = await firestore.collection('cars').doc(rentalData.carId).get();
         var carData = carSnapshot.data() as Map<String, dynamic>;
         rentalsWithCars.add(RentalWithCar(
@@ -30,8 +30,8 @@ class RentalsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Aktualne Rezerwacje"),
-        backgroundColor: Color.fromARGB(255, 127, 214, 255),
+        title: const Text("Aktualne Rezerwacje"),
+        backgroundColor: const Color.fromARGB(255, 127, 214, 255),
       ),
       body: CustomScrollView(
         slivers: <Widget>[
@@ -42,9 +42,9 @@ class RentalsScreen extends StatelessWidget {
           StreamBuilder<List<RentalWithCar>>(
             stream: getRentalsWithCars(),
             builder: (context, snapshot) {
-              if (snapshot.hasError) return SliverFillRemaining(child: Text('Wystąpił błąd'));
+              if (snapshot.hasError) return const SliverFillRemaining(child: Text('Wystąpił błąd'));
               if (snapshot.connectionState == ConnectionState.waiting) {
-                return SliverFillRemaining(child: CircularProgressIndicator());
+                return const SliverFillRemaining(child: CircularProgressIndicator());
               }
               var rentalsWithCars = snapshot.data ?? [];
               return SliverList(
@@ -54,8 +54,8 @@ class RentalsScreen extends StatelessWidget {
                     DateTime startDate = DateTime.parse(rentalWithCar.rental.dateStart);
                     DateTime endDate = DateTime.parse(rentalWithCar.rental.dateEnd);
                     return Container(
-                      margin: EdgeInsets.all(8.0),
-                      padding: EdgeInsets.all(8.0),
+                      margin: const EdgeInsets.all(8.0),
+                      padding: const EdgeInsets.all(8.0),
                       decoration: BoxDecoration(
                         border: Border.all(color: Colors.white),
                         borderRadius: BorderRadius.circular(8),
@@ -76,11 +76,11 @@ class RentalsScreen extends StatelessWidget {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          Navigator.push(context, MaterialPageRoute(builder: (context) => CreateRentalScreen()));
+          Navigator.push(context, MaterialPageRoute(builder: (context) => const CreateRentalScreen()));
         },
         backgroundColor: const Color.fromARGB(255, 0, 174, 255),
         tooltip: 'Dodaj rezerwację',
-        child: Icon(Icons.add),
+        child: const Icon(Icons.add),
       ),
     );
   }
@@ -98,8 +98,8 @@ class _CalendarHeaderDelegate extends SliverPersistentHeaderDelegate {
       color: Colors.white,  // Tło kalendarza
       child: CalendarDatePicker(
         initialDate: DateTime.now(),
-        firstDate: DateTime.now().subtract(Duration(days: 365)),
-        lastDate: DateTime.now().add(Duration(days: 365)),
+        firstDate: DateTime.now().subtract(const Duration(days: 365)),
+        lastDate: DateTime.now().add(const Duration(days: 365)),
         onDateChanged: (DateTime value) {
           // Implementacja reakcji na zmianę daty, jeśli jest potrzebna
         },

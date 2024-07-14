@@ -182,9 +182,9 @@ class _LoginPageState extends State<LoginPage> {
         style: TextButton.styleFrom(
           foregroundColor: const Color.fromARGB(255, 243, 156, 33),
         ),
-        child: Text(
+        child: const Text(
           'Zapomniałeś hasła?',
-          style: TextStyle(fontSize: 14),
+          style: const TextStyle(fontSize: 14),
         ),
       ),
     );
@@ -197,9 +197,9 @@ class _LoginPageState extends State<LoginPage> {
         title: _title(),
       ),
       body: Container(
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           gradient: LinearGradient(
-            colors: [const Color.fromARGB(255, 110, 179, 236), Colors.lightBlueAccent],
+            colors: [Color.fromARGB(255, 110, 179, 236), Colors.lightBlueAccent],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),

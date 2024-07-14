@@ -1,5 +1,4 @@
 import 'package:carrently/auth.dart';
-import 'package:carrently/pages/rentals_screen_page.dart';
 import 'package:carrently/pages/login_register_page.dart';
 import 'package:carrently/pages/myhomepage.dart';
 import 'package:flutter/material.dart';
@@ -18,7 +17,7 @@ class _WidgetTreeState extends State<WidgetTree> {
       stream: Auth().authStateChanges,
       builder: (context, snapshot){
         if (snapshot.hasData){
-          return MyHomePage();
+          return const MyHomePage();
         } else {
           return const LoginPage();
         }

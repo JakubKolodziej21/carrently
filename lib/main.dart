@@ -1,7 +1,4 @@
 import 'package:carrently/firebase_options.dart';
-import 'package:carrently/pages/rentals_screen_page.dart';
-import 'package:carrently/pages/myhomepage.dart';
-import 'package:carrently/pages/welcome_page.dart';
 import 'package:carrently/widget_tree.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -31,8 +28,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.orange,
         ),
-        //TODO: Add welcome page functionality
-        home: WidgetTree(),
+        home: const WidgetTree(),
     );
 }
 }

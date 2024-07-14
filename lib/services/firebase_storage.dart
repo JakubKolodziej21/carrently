@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 class ImageFromFirebaseStorage extends StatelessWidget {
   final String imagePath;
 
-  ImageFromFirebaseStorage({required this.imagePath});
+  const ImageFromFirebaseStorage({super.key, required this.imagePath});
 
   Future<String> _getImageUrl(String imagePath) async {
   try {
@@ -28,9 +28,9 @@ class ImageFromFirebaseStorage extends StatelessWidget {
           return Image.network(snapshot.data!);
         }
         if (snapshot.connectionState == ConnectionState.waiting || !snapshot.hasData) {
-          return CircularProgressIndicator();
+          return const CircularProgressIndicator();
         }
-        return Icon(Icons.error);  // W przypadku błędu ładowania obrazu
+        return const Icon(Icons.error);  // W przypadku błędu ładowania obrazu
       },
     );
   }

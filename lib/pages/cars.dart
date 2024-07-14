@@ -6,14 +6,16 @@ import 'package:flutter/material.dart';
 class CarsListScreen extends StatelessWidget {
   final FirestoreService _firestoreService = FirestoreService();
 
+  CarsListScreen({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Lista samochodów"),
+        title: const Text("Lista samochodów"),
         actions: [
           IconButton(
-            icon: Icon(Icons.search),
+            icon: const Icon(Icons.search),
             onPressed: () {
               // Dodaj funkcjonalność wyszukiwania
             },
@@ -21,7 +23,7 @@ class CarsListScreen extends StatelessWidget {
         ],
       ),
       body: Container(
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           gradient: LinearGradient(
             colors: [Colors.blueAccent, Colors.lightBlue],
             begin: Alignment.topLeft,
@@ -37,7 +39,7 @@ class CarsListScreen extends StatelessWidget {
               );
             }
             if (!snapshot.hasData) {
-              return Center(
+              return const Center(
                 child: CircularProgressIndicator(),
               );
             }
@@ -47,22 +49,22 @@ class CarsListScreen extends StatelessWidget {
               itemBuilder: (context, index) {
                 Car car = cars[index];
                 return Card(
-                  margin: EdgeInsets.all(5),
+                  margin: const EdgeInsets.all(5),
                   elevation: 5,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(15),
                   ),
                   child: ListTile(
-                    contentPadding: EdgeInsets.all(10),
+                    contentPadding: const EdgeInsets.all(10),
                     title: Text(
                       car.name,
-                      style: TextStyle(fontWeight: FontWeight.bold),
+                      style: const TextStyle(fontWeight: FontWeight.bold),
                     ),
                     subtitle: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text("${car.year}"),
-                        SizedBox(height: 5),
+                        const SizedBox(height: 5),
                         _carDetailRow(Icons.attach_money, "Koszt na km: \$${car.costPerKm.toStringAsFixed(2)}"),
                         _carDetailRow(Icons.timer, "Opóźnienie kara: \$${car.delayFine}"),
                         _carDetailRow(Icons.door_front_door, "Liczba drzwi: ${car.doors}"),
@@ -83,12 +85,12 @@ class CarsListScreen extends StatelessWidget {
                             backgroundImage: NetworkImage(snapshot.data!),
                           );
                         } else {
-                          return CircularProgressIndicator();
+                          return const CircularProgressIndicator();
                         }
                       },
                     ),
                     trailing: IconButton(
-                      icon: Icon(Icons.directions_car),
+                      icon: const Icon(Icons.directions_car),
                       onPressed: () {
                         // Dodaj funkcjonalność wypożyczania
                       },
@@ -107,7 +109,7 @@ class CarsListScreen extends StatelessWidget {
     return Row(
       children: [
         Icon(icon, size: 20, color: Colors.grey),
-        SizedBox(width: 5),
+        const SizedBox(width: 5),
         Text(text),
       ],
     );

@@ -2,9 +2,11 @@ import 'package:carrently/models/car.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart'; // Import do formatowania dat
+import 'package:intl/intl.dart';
 
 class CreateRentalScreen extends StatefulWidget {
+  const CreateRentalScreen({super.key});
+
   @override
   _CreateRentalScreenState createState() => _CreateRentalScreenState();
 }
@@ -26,7 +28,7 @@ class _CreateRentalScreenState extends State<CreateRentalScreen> {
     var querySnapshot = await firestore.collection('cars').get();
     setState(() {
       cars = querySnapshot.docs.map((doc) {
-        var data = doc.data() as Map<String, dynamic>;
+        var data = doc.data();
         return Car.fromMap(data, doc.id);
       }).toList();
     });
@@ -52,12 +54,12 @@ class _CreateRentalScreenState extends State<CreateRentalScreen> {
 
   Future<void> createRental() async {
     if (selectedCar == null || startDate == null || endDate == null) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Proszę wybrać wszystkie pola')));
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: const Text('Proszę wybrać wszystkie pola')));
       return;
     }
 
     if (endDate!.isBefore(startDate!)) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Data zakończenia musi być później niż data rozpoczęcia')));
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Data zakończenia musi być później niż data rozpoczęcia')));
       return;
     }
 
@@ -69,7 +71,7 @@ class _CreateRentalScreenState extends State<CreateRentalScreen> {
       'date_end': DateFormat('yyyy-MM-dd').format(endDate!),
       'user_id': userId
     });
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Rezerwacja utworzona pomyślnie')));
+    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Rezerwacja utworzona pomyślnie')));
     Navigator.of(context).pop();
   }
 
@@ -77,11 +79,11 @@ class _CreateRentalScreenState extends State<CreateRentalScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Stwórz Rezerwację"),
+        title: const Text("Stwórz Rezerwację"),
         backgroundColor: Colors.blue, // Niebieski kolor dla AppBar
       ),
       body: Container(
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topRight,
             end: Alignment.bottomLeft,
@@ -90,7 +92,7 @@ class _CreateRentalScreenState extends State<CreateRentalScreen> {
         ),
         child: Center(
           child: SingleChildScrollView(
-            padding: EdgeInsets.all(16),
+            padding: const EdgeInsets.all(16),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
@@ -109,36 +111,36 @@ class _CreateRentalScreenState extends State<CreateRentalScreen> {
                     );
                   }).toList(),
                 ),
-                SizedBox(height: 20),
+                const SizedBox(height: 20),
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.orange,
-                    padding: EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+                    padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
                   ),
                   onPressed: () => _selectDate(context, isStartDate: true),
-                  child: Text('Wybierz datę rozpoczęcia'),
+                  child: const Text('Wybierz datę rozpoczęcia'),
                 ),
-                SizedBox(height: 10),
+                const SizedBox(height: 10),
                 Text(startDate != null ? 'Data rozpoczęcia: ${DateFormat('yyyy-MM-dd').format(startDate!)}' : 'Brak wybranej daty rozpoczęcia'),
-                SizedBox(height: 20),
+                const SizedBox(height: 20),
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.orange,
-                    padding: EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+                    padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
                   ),
                   onPressed: () => _selectDate(context, isStartDate: false),
-                  child: Text('Wybierz datę zakończenia'),
+                  child: const Text('Wybierz datę zakończenia'),
                 ),
-                SizedBox(height: 10),
+                const SizedBox(height: 10),
                 Text(endDate != null ? 'Data zakończenia: ${DateFormat('yyyy-MM-dd').format(endDate!)}' : 'Brak wybranej daty zakończenia'),
-                SizedBox(height: 20),
+                const SizedBox(height: 20),
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.orange,
-                    padding: EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+                    padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
                   ),
                   onPressed: createRental,
-                  child: Text('Utwórz Rezerwację'),
+                  child: const Text('Utwórz Rezerwację'),
                 ),
               ],
             ),
