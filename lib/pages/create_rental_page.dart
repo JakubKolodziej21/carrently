@@ -2,6 +2,7 @@ import 'package:carrently/models/car.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart'; // Import do formatowania dat
 
 class CreateRentalScreen extends StatefulWidget {
   @override
@@ -35,7 +36,7 @@ class _CreateRentalScreenState extends State<CreateRentalScreen> {
     final DateTime? picked = await showDatePicker(
       context: context,
       initialDate: isStartDate ? startDate ?? DateTime.now() : endDate ?? DateTime.now(),
-      firstDate: DateTime.now(), // Ensure no past dates are selectable
+      firstDate: DateTime.now(), // Zapobiega wybraniu daty z przeszłości
       lastDate: DateTime(2030),
     );
     if (picked != null) {
@@ -49,40 +50,14 @@ class _CreateRentalScreenState extends State<CreateRentalScreen> {
     }
   }
 
- Future<bool> isCarAvailable() async {
-  if (selectedCar == null || startDate == null || endDate == null) return false;
-
-  try {
-    FirebaseFirestore firestore = FirebaseFirestore.instance;
-    var rentalsQuery = firestore.collection('rentals')
-      .where('car_id', isEqualTo: selectedCar!.id)
-      .where('date_end', isGreaterThan: startDate!.toIso8601String())
-      .where('date_start', isLessThan: endDate!.toIso8601String());
-
-    var querySnapshot = await rentalsQuery.get();
-    return querySnapshot.docs.isEmpty;
-  } catch (e) {
-    print("Error checking car availability: $e");
-    return false;
-  }
-}
-
-
-
-
   Future<void> createRental() async {
     if (selectedCar == null || startDate == null || endDate == null) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Please select all fields')));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Proszę wybrać wszystkie pola')));
       return;
     }
 
     if (endDate!.isBefore(startDate!)) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('End date must be after start date')));
-      return;
-    }
-
-    if (!await isCarAvailable()) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Car is already booked for selected dates')));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Data zakończenia musi być później niż data rozpoczęcia')));
       return;
     }
 
@@ -90,53 +65,82 @@ class _CreateRentalScreenState extends State<CreateRentalScreen> {
     FirebaseFirestore firestore = FirebaseFirestore.instance;
     await firestore.collection('rentals').add({
       'car_id': selectedCar!.id,
-      'date_start': startDate!.toIso8601String(),
-      'date_end': endDate!.toIso8601String(),
-      'user_id': userId  // Use the obtained user ID
+      'date_start': DateFormat('yyyy-MM-dd').format(startDate!), // Formatowanie daty
+      'date_end': DateFormat('yyyy-MM-dd').format(endDate!), // Formatowanie daty
+      'user_id': userId  // Użycie uzyskanego ID użytkownika
     });
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Rental created successfully')));
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Rezerwacja utworzona pomyślnie')));
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Create a Rental"),
+        title: Text("Stwórz Rezerwację"),
+        backgroundColor: Colors.blue, // Niebieski kolor dla AppBar
       ),
-      body: SingleChildScrollView(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            if (cars.isNotEmpty) 
-              DropdownButton<Car>(
-                value: selectedCar,
-                onChanged: (Car? newValue) {
-                  setState(() {
-                    selectedCar = newValue;
-                  });
-                },
-                items: cars.map<DropdownMenuItem<Car>>((Car car) {
-                  return DropdownMenuItem<Car>(
-                    value: car,
-                    child: Text("${car.brand} ${car.name} (${car.year})"),
-                  );
-                }).toList(),
-              ),
-            ElevatedButton(
-              onPressed: () => _selectDate(context, isStartDate: true),
-              child: Text('Select Start Date'),
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topRight,
+            end: Alignment.bottomLeft,
+            colors: [Colors.blue, Colors.blueAccent],
+          ),
+        ),
+        child: Center(
+          child: SingleChildScrollView(
+            padding: EdgeInsets.all(16),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                DropdownButton<Car>(
+                  value: selectedCar,
+                  onChanged: (Car? newValue) {
+                    setState(() {
+                      selectedCar = newValue;
+                    });
+                  },
+                  items: cars.map<DropdownMenuItem<Car>>((Car car) {
+                    return DropdownMenuItem<Car>(
+                      value: car,
+                      child: Text("${car.brand} ${car.name} (${car.year})"),
+                    );
+                  }).toList(),
+                ),
+                SizedBox(height: 20),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.orange, // Pomarańczowy kolor przycisku
+                    padding: EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+                  ),
+                  onPressed: () => _selectDate(context, isStartDate: true),
+                  child: Text('Wybierz datę rozpoczęcia'),
+                ),
+                SizedBox(height: 10),
+                Text(startDate != null ? 'Data rozpoczęcia: ${DateFormat('yyyy-MM-dd').format(startDate!)}' : 'Brak wybranej daty rozpoczęcia'),
+                SizedBox(height: 20),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.orange,
+                    padding: EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+                  ),
+                  onPressed: () => _selectDate(context, isStartDate: false),
+                  child: Text('Wybierz datę zakończenia'),
+                ),
+                SizedBox(height: 10),
+                Text(endDate != null ? 'Data zakończenia: ${DateFormat('yyyy-MM-dd').format(endDate!)}' : 'Brak wybranej daty zakończenia'),
+                SizedBox(height: 20),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.orange,
+                    padding: EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+                  ),
+                  onPressed: createRental,
+                  child: Text('Utwórz Rezerwację'),
+                ),
+              ],
             ),
-            Text(startDate != null ? 'Start Date: ${startDate!.toIso8601String()}' : 'No start date selected'),
-            ElevatedButton(
-              onPressed: () => _selectDate(context, isStartDate: false),
-              child: Text('Select End Date'),
-            ),
-            Text(endDate != null ? 'End Date: ${endDate!.toIso8601String()}' : 'No end date selected'),
-            ElevatedButton(
-              onPressed: createRental,
-              child: Text('Create Rental'),
-            ),
-          ],
+          ),
         ),
       ),
     );
