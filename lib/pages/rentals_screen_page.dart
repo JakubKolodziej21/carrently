@@ -3,10 +3,11 @@ import 'package:carrently/models/rentals.dart';
 import 'package:carrently/pages/create_rental_page.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:intl/intl.dart'; // Import do formatowania dat
 
 class RentalsScreen extends StatelessWidget {
   final FirebaseFirestore firestore = FirebaseFirestore.instance;
-  final String? userId = getUserId();
+  final String? userId = getUserId();  // Upewnij się, że ta metoda poprawnie zwraca userID
 
   Stream<List<RentalWithCar>> getRentalsWithCars() {
     return firestore.collection('rentals').where('user_id', isEqualTo: userId).snapshots().asyncMap((snapshot) async {
@@ -30,38 +31,84 @@ class RentalsScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text("Aktualne Rezerwacje"),
+        backgroundColor: Color.fromARGB(255, 127, 214, 255),
       ),
-      body: StreamBuilder<List<RentalWithCar>>(
-        stream: getRentalsWithCars(),
-        builder: (context, snapshot) {
-          if (snapshot.hasError) {
-            return Text('Wystąpił błąd');
-          }
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return CircularProgressIndicator();
-          }
-          var rentalsWithCars = snapshot.data ?? [];
-          return ListView.builder(
-            itemCount: rentalsWithCars.length,
-            itemBuilder: (context, index) {
-              var rentalWithCar = rentalsWithCars[index];
-              return ListTile(
-                title: Text('Samochód: ${rentalWithCar.carBrand} ${rentalWithCar.carModel}'),
-                subtitle: Text('Od: ${rentalWithCar.rental.dateStart} Do: ${rentalWithCar.rental.dateEnd}'),
+      body: CustomScrollView(
+        slivers: <Widget>[
+          SliverPersistentHeader(
+            delegate: _CalendarHeaderDelegate(),
+            pinned: true,
+          ),
+          StreamBuilder<List<RentalWithCar>>(
+            stream: getRentalsWithCars(),
+            builder: (context, snapshot) {
+              if (snapshot.hasError) return SliverFillRemaining(child: Text('Wystąpił błąd'));
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return SliverFillRemaining(child: CircularProgressIndicator());
+              }
+              var rentalsWithCars = snapshot.data ?? [];
+              return SliverList(
+                delegate: SliverChildBuilderDelegate(
+                  (context, index) {
+                    var rentalWithCar = rentalsWithCars[index];
+                    DateTime startDate = DateTime.parse(rentalWithCar.rental.dateStart);
+                    DateTime endDate = DateTime.parse(rentalWithCar.rental.dateEnd);
+                    return Container(
+                      margin: EdgeInsets.all(8.0),
+                      padding: EdgeInsets.all(8.0),
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Colors.white),
+                        borderRadius: BorderRadius.circular(8),
+                        color: Colors.white.withOpacity(0.3),
+                      ),
+                      child: ListTile(
+                        title: Text('Samochód: ${rentalWithCar.carBrand} ${rentalWithCar.carModel}'),
+                        subtitle: Text('Od: ${DateFormat('yyyy-MM-dd').format(startDate)} Do: ${DateFormat('yyyy-MM-dd').format(endDate)}'),
+                      ),
+                    );
+                  },
+                  childCount: rentalsWithCars.length,
+                ),
               );
             },
-          );
-        },
+          ),
+        ],
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           Navigator.push(context, MaterialPageRoute(builder: (context) => CreateRentalScreen()));
         },
+        backgroundColor: const Color.fromARGB(255, 0, 174, 255),
         tooltip: 'Dodaj rezerwację',
         child: Icon(Icons.add),
       ),
     );
   }
+}
+
+class _CalendarHeaderDelegate extends SliverPersistentHeaderDelegate {
+  @override
+  double get minExtent => 250;  // Minimalna wysokość widżetu kalendarza
+  @override
+  double get maxExtent => 250;  // Maksymalna wysokość widżetu kalendarza
+
+  @override
+  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
+    return Container(
+      color: Colors.white,  // Tło kalendarza
+      child: CalendarDatePicker(
+        initialDate: DateTime.now(),
+        firstDate: DateTime.now().subtract(Duration(days: 365)),
+        lastDate: DateTime.now().add(Duration(days: 365)),
+        onDateChanged: (DateTime value) {
+          // Implementacja reakcji na zmianę daty, jeśli jest potrzebna
+        },
+      ),
+    );
+  }
+
+  @override
+  bool shouldRebuild(_CalendarHeaderDelegate oldDelegate) => false;
 }
 
 class RentalWithCar {
