@@ -65,11 +65,12 @@ class _CreateRentalScreenState extends State<CreateRentalScreen> {
     FirebaseFirestore firestore = FirebaseFirestore.instance;
     await firestore.collection('rentals').add({
       'car_id': selectedCar!.id,
-      'date_start': DateFormat('yyyy-MM-dd').format(startDate!), // Formatowanie daty
-      'date_end': DateFormat('yyyy-MM-dd').format(endDate!), // Formatowanie daty
-      'user_id': userId  // Użycie uzyskanego ID użytkownika
+      'date_start': DateFormat('yyyy-MM-dd').format(startDate!),
+      'date_end': DateFormat('yyyy-MM-dd').format(endDate!),
+      'user_id': userId
     });
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Rezerwacja utworzona pomyślnie')));
+    Navigator.of(context).pop();
   }
 
   @override
@@ -84,7 +85,7 @@ class _CreateRentalScreenState extends State<CreateRentalScreen> {
           gradient: LinearGradient(
             begin: Alignment.topRight,
             end: Alignment.bottomLeft,
-            colors: [Colors.blue, Colors.blueAccent],
+            colors: [Colors.blue, Colors.lightBlueAccent],
           ),
         ),
         child: Center(
@@ -94,6 +95,7 @@ class _CreateRentalScreenState extends State<CreateRentalScreen> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
                 DropdownButton<Car>(
+                  isExpanded: true,
                   value: selectedCar,
                   onChanged: (Car? newValue) {
                     setState(() {
@@ -110,7 +112,7 @@ class _CreateRentalScreenState extends State<CreateRentalScreen> {
                 SizedBox(height: 20),
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.orange, // Pomarańczowy kolor przycisku
+                    backgroundColor: Colors.orange,
                     padding: EdgeInsets.symmetric(horizontal: 30, vertical: 15),
                   ),
                   onPressed: () => _selectDate(context, isStartDate: true),
