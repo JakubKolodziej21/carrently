@@ -67,6 +67,6 @@ flutter {
     source '../..'
 }
 
-dependencies {
-    classpath 'com.google.gms:google-services:4.3.10' // wersja może się różnić
-}
+// dependencies {
+//     classpath 'com.google.gms:google-services:4.3.10' 
+// }
