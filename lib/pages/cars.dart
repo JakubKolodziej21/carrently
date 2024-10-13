@@ -49,52 +49,96 @@ class CarsListScreen extends StatelessWidget {
               itemBuilder: (context, index) {
                 Car car = cars[index];
                 return Card(
-                  margin: const EdgeInsets.all(5),
+                  margin: const EdgeInsets.all(10),
                   elevation: 5,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(15),
                   ),
-                  child: ListTile(
-                    contentPadding: const EdgeInsets.all(10),
-                    title: Text(
-                      car.name,
-                      style: const TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    subtitle: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text("${car.year}"),
-                        const SizedBox(height: 5),
-                        _carDetailRow(Icons.attach_money, "Koszt na km: \$${car.costPerKm.toStringAsFixed(2)}"),
-                        _carDetailRow(Icons.timer, "Opóźnienie kara: \$${car.delayFine}"),
-                        _carDetailRow(Icons.door_front_door, "Liczba drzwi: ${car.doors}"),
-                        _carDetailRow(Icons.local_gas_station, "Rodzaj paliwa: ${car.fuelType}"),
-                        _carDetailRow(Icons.opacity, "Pojemność paliwa: ${car.fuelCapacity} L"),
-                        _carDetailRow(Icons.settings, "Skrzynia biegów: ${car.gearbox}"),
-                        _carDetailRow(Icons.speed, "Przebieg: ${car.mileage} km"),
-                        _carDetailRow(Icons.event_seat, "Liczba miejsc: ${car.seats}"),
-                        _carDetailRow(Icons.directions_car, "Typ: ${car.type}"),
-                      ],
-                    ),
-                    leading: FutureBuilder(
-                      future: _getImageUrl(car.thumbnailImage),
-                      builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
-                        if (snapshot.connectionState == ConnectionState.done && snapshot.hasData) {
-                          return CircleAvatar(
-                            radius: 30,
-                            backgroundImage: NetworkImage(snapshot.data!),
-                          );
-                        } else {
-                          return const CircularProgressIndicator();
-                        }
-                      },
-                    ),
-                    trailing: IconButton(
-                      icon: const Icon(Icons.directions_car),
-                      onPressed: () {
-                        // Dodaj funkcjonalność wypożyczania
-                      },
-                    ),
+                  child: Column(
+                    children: [
+                      ClipRRect(
+                        borderRadius: BorderRadius.vertical(top: Radius.circular(15)),
+                        child: FutureBuilder(
+                          future: _getImageUrl(car.thumbnailImage),
+                          builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
+                            if (snapshot.connectionState == ConnectionState.done && snapshot.hasData) {
+                              return Image.network(
+                                snapshot.data!,
+                                height: 150,
+                                width: double.infinity,
+                                fit: BoxFit.contain,
+                              );
+                            } else {
+                              return Container(
+                                height: 150,
+                                color: Colors.grey[300],
+                                child: const Center(child: CircularProgressIndicator()),
+                              );
+                            }
+                          },
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(10),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              car.name,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 18,
+                              ),
+                            ),
+                            const SizedBox(height: 5),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                _carDetailRow(Icons.attach_money, "Koszt na km: \$${car.costPerKm.toStringAsFixed(2)}"),
+                                _carDetailRow(Icons.timer, "Opóźnienie kara: \$${car.delayFine}"),
+                              ],
+                            ),
+                            const SizedBox(height: 5),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                _carDetailRow(Icons.door_front_door, "Liczba drzwi: ${car.doors}"),
+                                _carDetailRow(Icons.local_gas_station, "Paliwo: ${car.fuelType}"),
+                              ],
+                            ),
+                            const SizedBox(height: 5),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                _carDetailRow(Icons.opacity, "Pojemność: ${car.fuelCapacity} L"),
+                                _carDetailRow(Icons.settings, "Skrzynia: ${car.gearbox}"),
+                              ],
+                            ),
+                            const SizedBox(height: 5),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                _carDetailRow(Icons.speed, "Przebieg: ${car.mileage} km"),
+                                _carDetailRow(Icons.event_seat, "Miejsca: ${car.seats}"),
+                              ],
+                            ),
+                            const SizedBox(height: 5),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                _carDetailRow(Icons.directions_car, "Typ: ${car.type}"),
+                                IconButton(
+                                  icon: const Icon(Icons.directions_car),
+                                  onPressed: () {
+                                    // Dodaj funkcjonalność wypożyczania
+                                  },
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
                 );
               },
@@ -122,7 +166,7 @@ class CarsListScreen extends StatelessWidget {
       return url;
     } catch (e) {
       print("Failed to load image URL: $e");
-      return ''; // Można zwrócić pusty string jako fallback
+      return ''; 
     }
   }
 }
