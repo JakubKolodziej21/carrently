@@ -54,12 +54,16 @@ class _CreateRentalScreenState extends State<CreateRentalScreen> {
 
   Future<void> createRental() async {
     if (selectedCar == null || startDate == null || endDate == null) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: const Text('Proszę wybrać wszystkie pola')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: const Text('Proszę wybrać wszystkie pola')),
+      );
       return;
     }
 
     if (endDate!.isBefore(startDate!)) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Data zakończenia musi być później niż data rozpoczęcia')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Data zakończenia musi być później niż data rozpoczęcia')),
+      );
       return;
     }
 
@@ -71,7 +75,9 @@ class _CreateRentalScreenState extends State<CreateRentalScreen> {
       'date_end': DateFormat('yyyy-MM-dd').format(endDate!),
       'user_id': userId
     });
-    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Rezerwacja utworzona pomyślnie')));
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Rezerwacja utworzona pomyślnie')),
+    );
     Navigator.of(context).pop();
   }
 
@@ -80,14 +86,14 @@ class _CreateRentalScreenState extends State<CreateRentalScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Stwórz Rezerwację"),
-        backgroundColor: Colors.blue, // Niebieski kolor dla AppBar
+        backgroundColor: Colors.lightBlueAccent[400], // Nowoczesny kolor AppBar
       ),
       body: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topRight,
             end: Alignment.bottomLeft,
-            colors: [Colors.blue, Colors.lightBlueAccent],
+            colors: [Colors.white, Colors.lightBlueAccent], // Lżejsze, nowoczesne kolory tła
           ),
         ),
         child: Center(
@@ -96,51 +102,94 @@ class _CreateRentalScreenState extends State<CreateRentalScreen> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
-                DropdownButton<Car>(
-                  isExpanded: true,
-                  value: selectedCar,
-                  onChanged: (Car? newValue) {
-                    setState(() {
-                      selectedCar = newValue;
-                    });
-                  },
-                  items: cars.map<DropdownMenuItem<Car>>((Car car) {
-                    return DropdownMenuItem<Car>(
-                      value: car,
-                      child: Text("${car.brand} ${car.name} (${car.year})"),
-                    );
-                  }).toList(),
-                ),
-                const SizedBox(height: 20),
-                ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.orange,
-                    padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+                Card(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(15),
                   ),
-                  onPressed: () => _selectDate(context, isStartDate: true),
-                  child: const Text('Wybierz datę rozpoczęcia'),
-                ),
-                const SizedBox(height: 10),
-                Text(startDate != null ? 'Data rozpoczęcia: ${DateFormat('yyyy-MM-dd').format(startDate!)}' : 'Brak wybranej daty rozpoczęcia'),
-                const SizedBox(height: 20),
-                ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.orange,
-                    padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+                  elevation: 8,
+                  shadowColor: Colors.teal.withOpacity(0.5),
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      children: [
+                        // Dropdown with new look
+                        DropdownButton<Car>(
+                          isExpanded: true,
+                          value: selectedCar,
+                          onChanged: (Car? newValue) {
+                            setState(() {
+                              selectedCar = newValue;
+                            });
+                          },
+                          items: cars.map<DropdownMenuItem<Car>>((Car car) {
+                            return DropdownMenuItem<Car>(
+                              value: car,
+                              child: Text(
+                                "${car.brand} ${car.name} (${car.year})",
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.lightBlueAccent[700],
+                                ),
+                              ),
+                            );
+                          }).toList(),
+                        ),
+                        const SizedBox(height: 20),
+                        ElevatedButton.icon(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.lightBlueAccent[400],
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(30),
+                            ),
+                            padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+                          ),
+                          onPressed: () => _selectDate(context, isStartDate: true),
+                          icon: const Icon(Icons.calendar_today),
+                          label: const Text('Wybierz datę rozpoczęcia'),
+                        ),
+                        const SizedBox(height: 10),
+                        Text(
+                          startDate != null
+                              ? 'Data rozpoczęcia: ${DateFormat('yyyy-MM-dd').format(startDate!)}'
+                              : 'Brak wybranej daty rozpoczęcia',
+                          style: const TextStyle(fontSize: 16, color: Colors.black54),
+                        ),
+                        const SizedBox(height: 20),
+                        ElevatedButton.icon(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.lightBlueAccent[400],
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(30),
+                            ),
+                            padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+                          ),
+                          onPressed: () => _selectDate(context, isStartDate: false),
+                          icon: const Icon(Icons.calendar_today),
+                          label: const Text('Wybierz datę zakończenia'),
+                        ),
+                        const SizedBox(height: 10),
+                        Text(
+                          endDate != null
+                              ? 'Data zakończenia: ${DateFormat('yyyy-MM-dd').format(endDate!)}'
+                              : 'Brak wybranej daty zakończenia',
+                          style: const TextStyle(fontSize: 16, color: Colors.black54),
+                        ),
+                        const SizedBox(height: 20),
+                        ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.orange[400],
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(30),
+                            ),
+                            padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+                          ),
+                          onPressed: createRental,
+                          child: const Text('Utwórz Rezerwację'),
+                        ),
+                      ],
+                    ),
                   ),
-                  onPressed: () => _selectDate(context, isStartDate: false),
-                  child: const Text('Wybierz datę zakończenia'),
-                ),
-                const SizedBox(height: 10),
-                Text(endDate != null ? 'Data zakończenia: ${DateFormat('yyyy-MM-dd').format(endDate!)}' : 'Brak wybranej daty zakończenia'),
-                const SizedBox(height: 20),
-                ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.orange,
-                    padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
-                  ),
-                  onPressed: createRental,
-                  child: const Text('Utwórz Rezerwację'),
                 ),
               ],
             ),
