@@ -190,13 +190,15 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: _title(),
-      ),
-      body: Container(
+@override
+Widget build(BuildContext context) {
+  return Scaffold(
+    appBar: AppBar(
+      title: _title(),
+    ),
+    body: SingleChildScrollView(  
+      child: Container(
+        height: MediaQuery.of(context).size.height, 
         decoration: const BoxDecoration(
           gradient: LinearGradient(
             colors: [Color.fromARGB(255, 110, 179, 236), Colors.lightBlueAccent],
@@ -210,7 +212,7 @@ class _LoginPageState extends State<LoginPage> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             Image.asset(
-              'assets/images/logo_white.png', // Ensure your logo is placed in the assets folder and mentioned in pubspec.yaml
+              'assets/images/logo_white.png',
               height: 300,
             ),
             const SizedBox(height: 20),
@@ -226,8 +228,8 @@ class _LoginPageState extends State<LoginPage> {
           ],
         ),
       ),
-    );
-  }
+    ),
+  );
 }
 
 String getFirebaseErrorMessage(String errorCode) {
@@ -247,4 +249,5 @@ String getFirebaseErrorMessage(String errorCode) {
     default:
       return 'Wystąpił nieznany błąd. Spróbuj ponownie później.';
   }
+}
 }
