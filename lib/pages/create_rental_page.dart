@@ -38,7 +38,7 @@ class _CreateRentalScreenState extends State<CreateRentalScreen> {
     final DateTime? picked = await showDatePicker(
       context: context,
       initialDate: isStartDate ? startDate ?? DateTime.now() : endDate ?? DateTime.now(),
-      firstDate: DateTime.now(), // Zapobiega wybraniu daty z przeszłości
+      firstDate: DateTime.now(),
       lastDate: DateTime(2030),
     );
     if (picked != null) {
@@ -55,7 +55,7 @@ class _CreateRentalScreenState extends State<CreateRentalScreen> {
   Future<void> createRental() async {
     if (selectedCar == null || startDate == null || endDate == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: const Text('Proszę wybrać wszystkie pola')),
+        const SnackBar(content: Text('Proszę wybrać wszystkie pola')),
       );
       return;
     }
@@ -69,12 +69,36 @@ class _CreateRentalScreenState extends State<CreateRentalScreen> {
 
     String? userId = FirebaseAuth.instance.currentUser?.uid;
     FirebaseFirestore firestore = FirebaseFirestore.instance;
-    await firestore.collection('rentals').add({
+
+    // Sprawdź, czy użytkownik istnieje
+    var userDoc = await firestore.collection('users').doc(userId).get();
+    if (!userDoc.exists) {
+      // Jeśli użytkownik nie istnieje, utwórz go
+      await firestore.collection('users').doc(userId).set({
+        'client_id': userId,
+        'company': 'Default', // możesz dostosować domyślne dane
+        'current_rent_id': '',
+        'email': FirebaseAuth.instance.currentUser?.email,
+        'favourite_cars': [],
+        'name': 'Default',
+        'surname': 'Default',
+        'phone': '000-000-000'
+      });
+    }
+
+    // Tworzenie nowej rezerwacji
+    var rentalDoc = await firestore.collection('rentals').add({
       'car_id': selectedCar!.id,
       'date_start': DateFormat('yyyy-MM-dd').format(startDate!),
       'date_end': DateFormat('yyyy-MM-dd').format(endDate!),
       'user_id': userId
     });
+
+    // Aktualizacja pola current_rent_id u użytkownika
+    await firestore.collection('users').doc(userId).update({
+      'current_rent_id': rentalDoc.id,
+    });
+
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('Rezerwacja utworzona pomyślnie')),
     );
@@ -86,14 +110,14 @@ class _CreateRentalScreenState extends State<CreateRentalScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Stwórz Rezerwację"),
-        backgroundColor: Colors.lightBlueAccent[400], // Nowoczesny kolor AppBar
+        backgroundColor: Colors.lightBlueAccent[400],
       ),
       body: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topRight,
             end: Alignment.bottomLeft,
-            colors: [Colors.white, Colors.lightBlueAccent], // Lżejsze, nowoczesne kolory tła
+            colors: [Colors.white, Colors.lightBlueAccent],
           ),
         ),
         child: Center(
@@ -112,7 +136,6 @@ class _CreateRentalScreenState extends State<CreateRentalScreen> {
                     padding: const EdgeInsets.all(16.0),
                     child: Column(
                       children: [
-                        // Dropdown with new look
                         DropdownButton<Car>(
                           isExpanded: true,
                           value: selectedCar,

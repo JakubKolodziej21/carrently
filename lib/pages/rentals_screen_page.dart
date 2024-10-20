@@ -13,7 +13,7 @@ class RentalsScreen extends StatelessWidget {
     return firestore.collection('rentals').where('user_id', isEqualTo: userId).snapshots().asyncMap((snapshot) async {
       List<RentalWithCar> rentalsWithCars = [];
       for (var rentalSnapshot in snapshot.docs) {
-        var rentalData = Rental.fromFirestore(rentalSnapshot.id, rentalSnapshot.data());
+        var rentalData = Rental.fromFirestore(rentalSnapshot.data());
         DocumentSnapshot carSnapshot = await firestore.collection('cars').doc(rentalData.carId).get();
         var carData = carSnapshot.data() as Map<String, dynamic>;
         rentalsWithCars.add(RentalWithCar(
@@ -24,15 +24,6 @@ class RentalsScreen extends StatelessWidget {
       }
       return rentalsWithCars;
     });
-  }
-
-  Future<void> endRental(Rental rental) async {
-    try {
-      // Funkcja do zakończenia wypożyczenia, np. można zmienić datę zakończenia na dzisiejszą
-      await firestore.collection('rentals').doc(rental.id).update({'date_end': DateFormat('yyyy-MM-dd').format(DateTime.now())});
-    } catch (error) {
-      print('Error ending rental: $error');
-    }
   }
 
   @override
@@ -62,56 +53,17 @@ class RentalsScreen extends StatelessWidget {
                     var rentalWithCar = rentalsWithCars[index];
                     DateTime startDate = DateTime.parse(rentalWithCar.rental.dateStart);
                     DateTime endDate = DateTime.parse(rentalWithCar.rental.dateEnd);
-                    bool isEnded = DateTime.now().isAfter(endDate);
-
-                    return Card(
+                    return Container(
                       margin: const EdgeInsets.all(8.0),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(15.0),
+                      padding: const EdgeInsets.all(8.0),
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Colors.white),
+                        borderRadius: BorderRadius.circular(8),
+                        color: Colors.white.withOpacity(0.3),
                       ),
-                      elevation: 4,
-                      child: Padding(
-                        padding: const EdgeInsets.all(12.0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Samochód: ${rentalWithCar.carBrand} ${rentalWithCar.carModel}',
-                              style: const TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              'Od: ${DateFormat('yyyy-MM-dd').format(startDate)} Do: ${DateFormat('yyyy-MM-dd').format(endDate)}',
-                              style: const TextStyle(fontSize: 16),
-                            ),
-                            const SizedBox(height: 8),
-                            if (!isEnded)
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.end,
-                                children: [
-                                  ElevatedButton.icon(
-                                    onPressed: () => endRental(rentalWithCar.rental),
-                                    icon: const Icon(Icons.check_circle),
-                                    label: const Text("Zakończ wypożyczenie"),
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: Colors.redAccent,
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(20),
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            if (isEnded)
-                              Text(
-                                'Wypożyczenie zakończone',
-                                style: const TextStyle(color: Colors.green, fontWeight: FontWeight.bold),
-                              ),
-                          ],
-                        ),
+                      child: ListTile(
+                        title: Text('Samochód: ${rentalWithCar.carBrand} ${rentalWithCar.carModel}'),
+                        subtitle: Text('Od: ${DateFormat('yyyy-MM-dd').format(startDate)} Do: ${DateFormat('yyyy-MM-dd').format(endDate)}'),
                       ),
                     );
                   },
@@ -136,14 +88,14 @@ class RentalsScreen extends StatelessWidget {
 
 class _CalendarHeaderDelegate extends SliverPersistentHeaderDelegate {
   @override
-  double get minExtent => 250; // Minimalna wysokość widżetu kalendarza
+  double get minExtent => 250;  // Minimalna wysokość widżetu kalendarza
   @override
-  double get maxExtent => 250; // Maksymalna wysokość widżetu kalendarza
+  double get maxExtent => 250;  // Maksymalna wysokość widżetu kalendarza
 
   @override
   Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
     return Container(
-      color: Colors.white, // Tło kalendarza
+      color: Colors.white,  // Tło kalendarza
       child: CalendarDatePicker(
         initialDate: DateTime.now(),
         firstDate: DateTime.now().subtract(const Duration(days: 365)),
@@ -167,28 +119,5 @@ class RentalWithCar {
   RentalWithCar({required this.rental, required this.carBrand, required this.carModel});
 }
 
-class Rental {
-  final String id;
-  final String carId;
-  final String dateStart;
-  final String dateEnd;
-  final String userId;
 
-  Rental({
-    required this.id,
-    required this.carId,
-    required this.dateStart,
-    required this.dateEnd,
-    required this.userId,
-  });
 
-  factory Rental.fromFirestore(String id, Map<String, dynamic> data) {
-    return Rental(
-      id: id,
-      carId: data['car_id'],
-      dateStart: data['date_start'],
-      dateEnd: data['date_end'],
-      userId: data['user_id'],
-    );
-  }
-}
