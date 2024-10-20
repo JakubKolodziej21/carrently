@@ -70,20 +70,34 @@ class _CreateRentalScreenState extends State<CreateRentalScreen> {
     String? userId = FirebaseAuth.instance.currentUser?.uid;
     FirebaseFirestore firestore = FirebaseFirestore.instance;
 
-    // Sprawdź, czy użytkownik istnieje
+    // 1. Sprawdzenie, czy użytkownik ma już aktywną rezerwację
     var userDoc = await firestore.collection('users').doc(userId).get();
-    if (!userDoc.exists) {
-      // Jeśli użytkownik nie istnieje, utwórz go
-      await firestore.collection('users').doc(userId).set({
-        'client_id': userId,
-        'company': 'Default', // możesz dostosować domyślne dane
-        'current_rent_id': '',
-        'email': FirebaseAuth.instance.currentUser?.email,
-        'favourite_cars': [],
-        'name': 'Default',
-        'surname': 'Default',
-        'phone': '000-000-000'
-      });
+    if (userDoc.exists && userDoc.data()?['current_rent_id'] != '') {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Masz już aktywną rezerwację. Nie możesz wynająć kolejnego samochodu.')),
+      );
+      return;
+    }
+
+    // 2. Sprawdzenie, czy samochód jest dostępny w wybranym terminie
+    var rentalsQuery = await firestore
+        .collection('rentals')
+        .where('car_id', isEqualTo: selectedCar!.id)
+        .get();
+
+    for (var doc in rentalsQuery.docs) {
+      var data = doc.data();
+      DateTime carStartDate = DateFormat('yyyy-MM-dd').parse(data['date_start']);
+      DateTime carEndDate = DateFormat('yyyy-MM-dd').parse(data['date_end']);
+
+      // Sprawdzenie, czy terminy się pokrywają
+      bool isOverlapping = !(endDate!.isBefore(carStartDate) || startDate!.isAfter(carEndDate));
+      if (isOverlapping) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Samochód jest już zajęty w wybranym terminie.')),
+        );
+        return;
+      }
     }
 
     // Tworzenie nowej rezerwacji
