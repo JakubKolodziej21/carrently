@@ -94,7 +94,7 @@ class CarsListScreen extends StatelessWidget {
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                _carDetailRow(Icons.attach_money, "Koszt na km: \$${car.costPerKm.toStringAsFixed(2)}"),
+                                _carDetailRow(Icons.attach_money, "Koszt za dzień: \$${car.startCost.toStringAsFixed(2)}"),
                                 _carDetailRow(Icons.timer, "Opóźnienie kara: \$${car.delayFine}"),
                               ],
                             ),
