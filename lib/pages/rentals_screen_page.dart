@@ -87,9 +87,11 @@ if (confirmed == true) {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("Aktualne Rezerwacje"),
-        backgroundColor: const Color.fromARGB(255, 127, 214, 255),
+      appBar: AppBar(title: const Text(
+          'Aktualne rezerwacje',
+          style: TextStyle(color: Colors.blueAccent), // Kolor tytułu
+        ),
+        backgroundColor: const Color.fromARGB(255, 255, 255, 255),
       ),
       body: CustomScrollView(
         slivers: <Widget>[

@@ -5,8 +5,11 @@ class SettingsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Ustawienia'),
+      appBar: AppBar(title: const Text(
+          'Ustawienia',
+          style: TextStyle(color: Colors.blueAccent), // Kolor tytułu
+        ),
+        backgroundColor: const Color.fromARGB(255, 255, 255, 255),
       ),
       body: ListView(
         children: ListTile.divideTiles(
