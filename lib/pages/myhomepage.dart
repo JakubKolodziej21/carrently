@@ -1,5 +1,6 @@
 
 import 'package:carrently/pages/cars.dart';
+import 'package:carrently/pages/payment.dart';
 import 'package:carrently/pages/rentals_screen_page.dart';
 import 'package:carrently/pages/settings.dart';
 import 'package:flutter/material.dart';
@@ -22,6 +23,7 @@ class _MyHomePageState extends State<MyHomePage> {
     screens = [
       CarsListScreen(),
       RentalsScreen(),
+      Payment(),
       SettingsScreen(),
       
     ];
@@ -55,6 +57,8 @@ class _MyHomePageState extends State<MyHomePage> {
               icon: Icon(Icons.car_rental_outlined), label: 'Samochody'),
           BottomNavigationBarItem(
               icon: Icon(Icons.calendar_month_outlined), label: 'Moje Wypożyczenia'),
+              BottomNavigationBarItem(
+              icon: Icon(Icons.attach_money_outlined), label: 'Płatności'),
           BottomNavigationBarItem(
               icon: Icon(Icons.settings_outlined), label: 'Ustawienia')
         ],
