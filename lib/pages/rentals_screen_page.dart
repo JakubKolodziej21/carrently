@@ -26,6 +26,64 @@ class RentalsScreen extends StatelessWidget {
     });
   }
 
+  Future<void> endRental(BuildContext context, RentalWithCar rentalWithCar) async {
+    // Pytanie użytkownika, czy na pewno chce zakończyć rezerwację
+    bool? confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Zakończyć rezerwację?'),
+        content: const Text('Czy na pewno chcesz zakończyć tę rezerwację?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Anuluj'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Zakończ'),
+          ),
+        ],
+      ),
+    );
+
+if (confirmed == true) {
+    DateTime start = DateTime.parse(rentalWithCar.rental.dateStart);
+    DateTime endDate = DateTime.parse(rentalWithCar.rental.dateEnd);
+    DateTime actualReturnDate = DateTime.now();
+
+    // Ustalanie liczby dni wynajmu
+    int totalDays = actualReturnDate.isBefore(endDate) ? endDate.difference(start).inDays : actualReturnDate.difference(start).inDays;
+    
+    // Obliczanie dni opóźnienia
+    int delayDays = actualReturnDate.isAfter(endDate) ? actualReturnDate.difference(endDate).inDays : 0;
+
+    // Pobieranie informacji o samochodzie z Firestore
+    DocumentSnapshot carSnapshot = await FirebaseFirestore.instance.collection('cars').doc(rentalWithCar.rental.carId).get();
+    Map<String, dynamic> carData = carSnapshot.data() as Map<String, dynamic>;
+
+    // Pobranie ceny za dzień i kary za opóźnienie z dokumentu
+    int dailyRate = carData['cost_per_day'] is int ? carData['cost_per_day'] : int.parse(carData['cost_per_day'].toString());
+    int delayPenalty = carData['delay_fine'] is int ? carData['delay_fine'] : int.parse(carData['delay_fine'].toString());
+
+    // Obliczanie całkowitej ceny
+    int totalPrice = (dailyRate * totalDays) + (delayPenalty * delayDays);
+
+    // Tworzenie wpisu w kolekcji "payments"
+    await FirebaseFirestore.instance.collection('payments').add({
+        'user_id': getUserId(),
+        'date': DateFormat('yyyy-MM-dd HH:mm:ss').format(start),
+        'price': totalPrice.toString(),
+        'type': 'rent',
+    });
+
+
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Rezerwacja została zakończona, wpis o płatności został dodany.')),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -64,6 +122,10 @@ class RentalsScreen extends StatelessWidget {
                       child: ListTile(
                         title: Text('Samochód: ${rentalWithCar.carBrand} ${rentalWithCar.carModel}'),
                         subtitle: Text('Od: ${DateFormat('yyyy-MM-dd').format(startDate)} Do: ${DateFormat('yyyy-MM-dd').format(endDate)}'),
+                        trailing: ElevatedButton(
+                          onPressed: () => endRental(context, rentalWithCar),
+                          child: const Text('Zakończ'),
+                        ),
                       ),
                     );
                   },
@@ -118,6 +180,4 @@ class RentalWithCar {
 
   RentalWithCar({required this.rental, required this.carBrand, required this.carModel});
 }
-
-
 
