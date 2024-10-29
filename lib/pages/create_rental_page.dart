@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 class CreateRentalScreen extends StatefulWidget {
-  const CreateRentalScreen({super.key});
+  const CreateRentalScreen({Key? key}) : super(key: key);
 
   @override
   _CreateRentalScreenState createState() => _CreateRentalScreenState();
@@ -68,11 +68,18 @@ class _CreateRentalScreenState extends State<CreateRentalScreen> {
     }
 
     String? userId = FirebaseAuth.instance.currentUser?.uid;
+    if (userId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Nie można znaleźć użytkownika')),
+      );
+      return;
+    }
+
     FirebaseFirestore firestore = FirebaseFirestore.instance;
 
     // 1. Sprawdzenie, czy użytkownik ma już aktywną rezerwację
     var userDoc = await firestore.collection('users').doc(userId).get();
-    if (userDoc.exists && userDoc.data()?['current_rent_id'] != '') {
+    if (userDoc.exists && userDoc.data()?['current_rent_id'] != null && userDoc.data()?['current_rent_id'] != '') {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Masz już aktywną rezerwację. Nie możesz wynająć kolejnego samochodu.')),
       );
@@ -98,6 +105,20 @@ class _CreateRentalScreenState extends State<CreateRentalScreen> {
         );
         return;
       }
+    }
+
+    // Jeśli użytkownik nie istnieje, utwórz go
+    if (!userDoc.exists) {
+      await firestore.collection('users').doc(userId).set({
+        'client_id': userId,
+        'company': 'Default', // możesz dostosować domyślne dane
+        'current_rent_id': '',
+        'email': FirebaseAuth.instance.currentUser?.email,
+        'favourite_cars': [],
+        'name': 'Default',
+        'surname': 'Default',
+        'phone': '000-000-000'
+      });
     }
 
     // Tworzenie nowej rezerwacji
