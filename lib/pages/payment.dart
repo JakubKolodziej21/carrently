@@ -6,25 +6,24 @@ class Payment extends StatelessWidget {
   // Utworzenie instancji Firestore
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  Future<double> getPaymentAmount() async {
+  Stream<double> getPaymentAmountStream() {
     // Pobieranie aktualnie zalogowanego użytkownika
     User? user = FirebaseAuth.instance.currentUser;
     
     if (user == null) {
-      return 0.0; // Zwróć 0, jeśli użytkownik nie jest zalogowany
+      return Stream.value(0.0); // Zwróć strumień z wartością 0, jeśli użytkownik nie jest zalogowany
     }
     
-    // Pobieranie kwoty z kolekcji 'payments' dla aktualnie zalogowanego użytkownika
-    QuerySnapshot snapshot = await _firestore.collection('payments')
-        .where('user_id', isEqualTo: user.uid) // Upewnij się, że pole user_id w dokumentach jest odpowiednio nazwane
-        .get();
-
-    if (snapshot.docs.isNotEmpty) {
-      // Zakładam, że chcemy pobrać kwotę z pierwszego dokumentu
-      return double.parse(snapshot.docs.first['price'].toString()); // Zakładam, że cena jest w polu 'price'
-    }
-
-    return 0.0; // Zwróć 0, jeśli nie znaleziono płatności
+    // Pobieranie strumienia danych z Firestore dla aktualnie zalogowanego użytkownika
+    return _firestore.collection('payments')
+      .where('user_id', isEqualTo: user.uid)
+      .snapshots()
+      .map((snapshot) {
+        if (snapshot.docs.isNotEmpty) {
+          return double.parse(snapshot.docs.first['price'].toString());
+        }
+        return 0.0; // Zwróć 0, jeśli nie znaleziono płatności
+      });
   }
 
   @override
@@ -46,8 +45,8 @@ class Payment extends StatelessWidget {
           ),
         ),
         child: Center(
-          child: FutureBuilder<double>(
-            future: getPaymentAmount(), // Wywołanie funkcji pobierającej kwotę
+          child: StreamBuilder<double>(
+            stream: getPaymentAmountStream(), // Wywołanie funkcji pobierającej strumień kwoty
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return const CircularProgressIndicator(); // Pokazuje spinner, gdy trwa ładowanie
