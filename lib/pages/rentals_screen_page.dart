@@ -3,11 +3,11 @@ import 'package:carrently/models/rentals.dart';
 import 'package:carrently/pages/create_rental_page.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:intl/intl.dart'; // Import do formatowania dat
+import 'package:intl/intl.dart';
 
 class RentalsScreen extends StatelessWidget {
   final FirebaseFirestore firestore = FirebaseFirestore.instance;
-  final String? userId = getUserId();  // Upewnij się, że ta metoda poprawnie zwraca userID
+  final String? userId = getUserId();
 
   Stream<List<RentalWithCar>> getRentalsWithCars() {
     return firestore.collection('rentals').where('user_id', isEqualTo: userId).snapshots().asyncMap((snapshot) async {
@@ -26,8 +26,21 @@ class RentalsScreen extends StatelessWidget {
     });
   }
 
+  Stream<bool> checkPaymentStatus(String dateStart) {
+    // Przekształcenie `dateStart` na format używany w payments dla `date`
+    String formattedDate = DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.parse(dateStart));
+
+    // Sprawdzanie na bieżąco, czy istnieje wpis w tabeli payments dla danego `user_id` i `date`
+    return firestore
+      .collection('payments')
+      .where('user_id', isEqualTo: userId)
+      .where('date', isEqualTo: formattedDate)
+      .where('type', isEqualTo: 'rent')
+      .snapshots()
+      .map((snapshot) => snapshot.docs.isNotEmpty);
+  }
+
   Future<void> endRental(BuildContext context, RentalWithCar rentalWithCar) async {
-    // Pytanie użytkownika, czy na pewno chce zakończyć rezerwację
     bool? confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -46,37 +59,29 @@ class RentalsScreen extends StatelessWidget {
       ),
     );
 
-if (confirmed == true) {
-    DateTime start = DateTime.parse(rentalWithCar.rental.dateStart);
-    DateTime endDate = DateTime.parse(rentalWithCar.rental.dateEnd);
-    DateTime actualReturnDate = DateTime.now();
+    if (confirmed == true) {
+      DateTime start = DateTime.parse(rentalWithCar.rental.dateStart);
+      DateTime endDate = DateTime.parse(rentalWithCar.rental.dateEnd);
+      DateTime actualReturnDate = DateTime.now();
 
-    // Ustalanie liczby dni wynajmu
-    int totalDays = actualReturnDate.isBefore(endDate) ? endDate.difference(start).inDays : actualReturnDate.difference(start).inDays;
-    
-    // Obliczanie dni opóźnienia
-    int delayDays = actualReturnDate.isAfter(endDate) ? actualReturnDate.difference(endDate).inDays : 0;
+      int totalDays = actualReturnDate.isBefore(endDate) ? endDate.difference(start).inDays : actualReturnDate.difference(start).inDays;
+      int delayDays = actualReturnDate.isAfter(endDate) ? actualReturnDate.difference(endDate).inDays : 0;
 
-    // Pobieranie informacji o samochodzie z Firestore
-    DocumentSnapshot carSnapshot = await FirebaseFirestore.instance.collection('cars').doc(rentalWithCar.rental.carId).get();
-    Map<String, dynamic> carData = carSnapshot.data() as Map<String, dynamic>;
+      DocumentSnapshot carSnapshot = await firestore.collection('cars').doc(rentalWithCar.rental.carId).get();
+      Map<String, dynamic> carData = carSnapshot.data() as Map<String, dynamic>;
 
-    // Pobranie ceny za dzień i kary za opóźnienie z dokumentu
-    int dailyRate = carData['cost_per_day'] is int ? carData['cost_per_day'] : int.parse(carData['cost_per_day'].toString());
-    int delayPenalty = carData['delay_fine'] is int ? carData['delay_fine'] : int.parse(carData['delay_fine'].toString());
+      int dailyRate = carData['cost_per_day'] is int ? carData['cost_per_day'] : int.parse(carData['cost_per_day'].toString());
+      int delayPenalty = carData['delay_fine'] is int ? carData['delay_fine'] : int.parse(carData['delay_fine'].toString());
 
-    // Obliczanie całkowitej ceny
-    int totalPrice = (dailyRate * totalDays) + (delayPenalty * delayDays);
+      int totalPrice = (dailyRate * totalDays) + (delayPenalty * delayDays);
 
-    // Tworzenie wpisu w kolekcji "payments"
-    await FirebaseFirestore.instance.collection('payments').add({
-        'user_id': getUserId(),
+      // Dodanie wpisu płatności
+      await firestore.collection('payments').add({
+        'user_id': userId,
         'date': DateFormat('yyyy-MM-dd HH:mm:ss').format(start),
         'price': totalPrice.toString(),
         'type': 'rent',
-    });
-
-
+      });
 
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Rezerwacja została zakończona, wpis o płatności został dodany.')),
@@ -87,9 +92,10 @@ if (confirmed == true) {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text(
+      appBar: AppBar(
+        title: const Text(
           'Aktualne rezerwacje',
-          style: TextStyle(color: Colors.blueAccent), // Kolor tytułu
+          style: TextStyle(color: Colors.blueAccent),
         ),
         backgroundColor: const Color.fromARGB(255, 255, 255, 255),
       ),
@@ -113,22 +119,35 @@ if (confirmed == true) {
                     var rentalWithCar = rentalsWithCars[index];
                     DateTime startDate = DateTime.parse(rentalWithCar.rental.dateStart);
                     DateTime endDate = DateTime.parse(rentalWithCar.rental.dateEnd);
-                    return Container(
-                      margin: const EdgeInsets.all(8.0),
-                      padding: const EdgeInsets.all(8.0),
-                      decoration: BoxDecoration(
-                        border: Border.all(color: Colors.white),
-                        borderRadius: BorderRadius.circular(8),
-                        color: Colors.white.withOpacity(0.3),
-                      ),
-                      child: ListTile(
-                        title: Text('Samochód: ${rentalWithCar.carBrand} ${rentalWithCar.carModel}'),
-                        subtitle: Text('Od: ${DateFormat('yyyy-MM-dd').format(startDate)} Do: ${DateFormat('yyyy-MM-dd').format(endDate)}'),
-                        trailing: ElevatedButton(
-                          onPressed: () => endRental(context, rentalWithCar),
-                          child: const Text('Zakończ'),
-                        ),
-                      ),
+
+                    return StreamBuilder<bool>(
+                      stream: checkPaymentStatus(rentalWithCar.rental.dateStart),
+                      builder: (context, paymentSnapshot) {
+                        if (paymentSnapshot.connectionState == ConnectionState.waiting) {
+                          return const CircularProgressIndicator();
+                        }
+
+                        bool paymentExists = paymentSnapshot.data ?? false;
+                        return Container(
+                          margin: const EdgeInsets.all(8.0),
+                          padding: const EdgeInsets.all(8.0),
+                          decoration: BoxDecoration(
+                            border: Border.all(color: Colors.white),
+                            borderRadius: BorderRadius.circular(8),
+                            color: Colors.white.withOpacity(0.3),
+                          ),
+                          child: ListTile(
+                            title: Text('Samochód: ${rentalWithCar.carBrand} ${rentalWithCar.carModel}'),
+                            subtitle: Text('Od: ${DateFormat('yyyy-MM-dd').format(startDate)} Do: ${DateFormat('yyyy-MM-dd').format(endDate)}'),
+                            trailing: paymentExists
+                                ? const Text('Oczekiwanie na płatność', style: TextStyle(color: Colors.red))
+                                : ElevatedButton(
+                                    onPressed: () => endRental(context, rentalWithCar),
+                                    child: const Text('Zakończ'),
+                                  ),
+                          ),
+                        );
+                      },
                     );
                   },
                   childCount: rentalsWithCars.length,
@@ -152,21 +171,19 @@ if (confirmed == true) {
 
 class _CalendarHeaderDelegate extends SliverPersistentHeaderDelegate {
   @override
-  double get minExtent => 250;  // Minimalna wysokość widżetu kalendarza
+  double get minExtent => 250;
   @override
-  double get maxExtent => 250;  // Maksymalna wysokość widżetu kalendarza
+  double get maxExtent => 250;
 
   @override
   Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
     return Container(
-      color: Colors.white,  // Tło kalendarza
+      color: Colors.white,
       child: CalendarDatePicker(
         initialDate: DateTime.now(),
         firstDate: DateTime.now().subtract(const Duration(days: 365)),
         lastDate: DateTime.now().add(const Duration(days: 365)),
-        onDateChanged: (DateTime value) {
-          // Implementacja reakcji na zmianę daty, jeśli jest potrzebna
-        },
+        onDateChanged: (DateTime value) {},
       ),
     );
   }
@@ -182,4 +199,3 @@ class RentalWithCar {
 
   RentalWithCar({required this.rental, required this.carBrand, required this.carModel});
 }
-
