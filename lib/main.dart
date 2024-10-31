@@ -2,6 +2,8 @@ import 'package:carrently/firebase_options.dart';
 import 'package:carrently/widget_tree.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:timezone/data/latest.dart' as tz; // Import danych strefy czasowej
+
 
 
 void main() async {
@@ -13,6 +15,7 @@ void main() async {
   } catch (e) {
     print('Error initializing Firebase: $e');
   }
+   tz.initializeTimeZones(); // Inicjalizacja danych strefy czasowej
   runApp(const MyApp());
 }
 

@@ -16,6 +16,7 @@ class RentalsScreen extends StatelessWidget {
         var rentalData = Rental.fromFirestore(rentalSnapshot.data());
         DocumentSnapshot carSnapshot = await firestore.collection('cars').doc(rentalData.carId).get();
         var carData = carSnapshot.data() as Map<String, dynamic>;
+
         rentalsWithCars.add(RentalWithCar(
           rental: rentalData,
           carBrand: carData['brand'],
@@ -26,9 +27,36 @@ class RentalsScreen extends StatelessWidget {
     });
   }
 
+  DateTime parseCustomDateTime(String dateString) {
+    // Przykładowy format: "Thu Oct 31 2024 00:00:00 GMT+0000 (czas środkowoeuropejski letni)"
+    List<String> parts = dateString.split(' ');
+
+    // Sprawdzamy, czy format jest poprawny
+    if (parts.length < 6) {
+      throw FormatException("Invalid date format: $dateString");
+    }
+
+    String month = parts[1];      // Miesiąc
+    String day = parts[2];        // Dzień
+    String year = parts[3];       // Rok
+    String time = parts[4];       // Czas
+    String gmtOffset = parts[5];  // GMT offset
+
+    int monthNumber = DateFormat('MMM').parse(month).month;
+
+    // Zmiana formatu daty na akceptowalny przez DateTime.parse
+    String dateTimeString = '$year-${monthNumber.toString().padLeft(2, '0')}-$day $time';
+
+    // Zmiana offsetu GMT
+    String adjustedDateTimeString = dateTimeString.replaceFirst("GMT", "").replaceFirst(" ", "T");
+
+    // Zwracamy DateTime
+    return DateTime.parse(adjustedDateTimeString);
+  }
+
   Stream<bool> checkPaymentStatus(String dateStart) {
-    // Przekształcenie `dateStart` na format używany w payments dla `date`
-    String formattedDate = DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.parse(dateStart));
+    // Użycie metody parseCustomDateTime do przetwarzania daty
+    String formattedDate = DateFormat('yyyy-MM-dd HH:mm:ss').format(parseCustomDateTime(dateStart));
 
     // Sprawdzanie na bieżąco, czy istnieje wpis w tabeli payments dla danego `user_id` i `date`
     return firestore
@@ -60,8 +88,8 @@ class RentalsScreen extends StatelessWidget {
     );
 
     if (confirmed == true) {
-      DateTime start = DateTime.parse(rentalWithCar.rental.dateStart);
-      DateTime endDate = DateTime.parse(rentalWithCar.rental.dateEnd);
+      DateTime start = parseCustomDateTime(rentalWithCar.rental.dateStart); // Użycie funkcji parsującej
+      DateTime endDate = parseCustomDateTime(rentalWithCar.rental.dateEnd); // Użycie funkcji parsującej
       DateTime actualReturnDate = DateTime.now();
 
       int totalDays = actualReturnDate.isBefore(endDate) ? endDate.difference(start).inDays : actualReturnDate.difference(start).inDays;
@@ -78,7 +106,7 @@ class RentalsScreen extends StatelessWidget {
       // Dodanie wpisu płatności
       await firestore.collection('payments').add({
         'user_id': userId,
-        'date': DateFormat('yyyy-MM-dd HH:mm:ss').format(start),
+        'date': DateFormat('yyyy-MM-dd HH:mm:ss').format(start), // Użycie formatu daty
         'price': totalPrice.toString(),
         'type': 'rent',
       });
@@ -117,8 +145,8 @@ class RentalsScreen extends StatelessWidget {
                 delegate: SliverChildBuilderDelegate(
                   (context, index) {
                     var rentalWithCar = rentalsWithCars[index];
-                    DateTime startDate = DateTime.parse(rentalWithCar.rental.dateStart);
-                    DateTime endDate = DateTime.parse(rentalWithCar.rental.dateEnd);
+                    DateTime startDate = parseCustomDateTime(rentalWithCar.rental.dateStart); // Użycie funkcji parsującej
+                    DateTime endDate = parseCustomDateTime(rentalWithCar.rental.dateEnd); // Użycie funkcji parsującej
 
                     return StreamBuilder<bool>(
                       stream: checkPaymentStatus(rentalWithCar.rental.dateStart),

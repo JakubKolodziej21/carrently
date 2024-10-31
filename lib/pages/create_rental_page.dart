@@ -3,6 +3,22 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:timezone/timezone.dart' as tz;
+import 'package:timezone/data/latest.dart' as tz;
+
+void main() {
+  tz.initializeTimeZones();
+  runApp(MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      home: CreateRentalScreen(),
+    );
+  }
+}
 
 class CreateRentalScreen extends StatefulWidget {
   const CreateRentalScreen({Key? key}) : super(key: key);
@@ -52,6 +68,57 @@ class _CreateRentalScreenState extends State<CreateRentalScreen> {
     }
   }
 
+  String formatCustomDateTime(DateTime dateTime) {
+    String dayOfWeek = DateFormat('EEE').format(dateTime);
+    String month = DateFormat('MMM').format(dateTime);
+    String day = dateTime.day.toString().padLeft(2, '0');
+    String year = dateTime.year.toString();
+    String time = DateFormat('HH:mm:ss').format(dateTime);
+
+    String gmtOffset = dateTime.timeZoneOffset.isNegative 
+        ? 'GMT-${dateTime.timeZoneOffset.inHours.abs().toString().padLeft(2, '0')}00' 
+        : 'GMT+${dateTime.timeZoneOffset.inHours.toString().padLeft(2, '0')}00';
+
+    String timezoneDescription = (dateTime.month >= 3 && dateTime.month < 11) 
+        ? '(czas środkowoeuropejski letni)' 
+        : '(czas środkowoeuropejski standardowy)';
+
+    return '$dayOfWeek $month $day $year $time $gmtOffset $timezoneDescription';
+  }
+
+  DateTime parseCustomDateTime(String dateString) {
+    try {
+      // Przykładowy format: "Thu Oct 31 2024 00:00:00 GMT+0000 (czas środkowoeuropejski letni)"
+      List<String> parts = dateString.split(' ');
+
+      // Sprawdzamy, czy format jest poprawny
+      if (parts.length < 6) {
+        throw FormatException("Invalid date format: $dateString");
+      }
+
+      String month = parts[1];      // Miesiąc
+      String day = parts[2];        // Dzień
+      String year = parts[3];       // Rok
+      String time = parts[4];       // Czas
+
+      // Konwersja miesiąca na numer
+      int monthNumber = DateFormat('MMM').parse(month).month;
+
+      // Budowanie daty jako String do parsowania przez DateTime
+      String dateTimeString = '$year-${monthNumber.toString().padLeft(2, '0')}-$day $time';
+
+      // Obsługa GMT offsetu
+      String gmtOffset = parts[5].replaceFirst("GMT", "").trim().replaceFirst(" ", ""); // Usuwamy 'GMT' i spacje
+      String adjustedDateTimeString = dateTimeString + gmtOffset;
+
+      // Użycie DateTime.parse
+      return DateTime.parse(adjustedDateTimeString);
+    } catch (e) {
+      print('Error parsing date: $e'); // Logowanie błędu
+      throw FormatException("Error parsing date: $dateString");
+    }
+  }
+
   Future<void> createRental() async {
     if (selectedCar == null || startDate == null || endDate == null) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -94,8 +161,9 @@ class _CreateRentalScreenState extends State<CreateRentalScreen> {
 
     for (var doc in rentalsQuery.docs) {
       var data = doc.data();
-      DateTime carStartDate = DateFormat('yyyy-MM-dd').parse(data['date_start']);
-      DateTime carEndDate = DateFormat('yyyy-MM-dd').parse(data['date_end']);
+      
+      DateTime carStartDate = parseCustomDateTime(data['date_start']);
+      DateTime carEndDate = parseCustomDateTime(data['date_end']);
 
       // Sprawdzenie, czy terminy się pokrywają
       bool isOverlapping = !(endDate!.isBefore(carStartDate) || startDate!.isAfter(carEndDate));
@@ -111,7 +179,7 @@ class _CreateRentalScreenState extends State<CreateRentalScreen> {
     if (!userDoc.exists) {
       await firestore.collection('users').doc(userId).set({
         'client_id': userId,
-        'company': 'Default', // możesz dostosować domyślne dane
+        'company': 'Default',
         'current_rent_id': '',
         'email': FirebaseAuth.instance.currentUser?.email,
         'favourite_cars': [],
@@ -124,8 +192,8 @@ class _CreateRentalScreenState extends State<CreateRentalScreen> {
     // Tworzenie nowej rezerwacji
     var rentalDoc = await firestore.collection('rentals').add({
       'car_id': selectedCar!.id,
-      'date_start': DateFormat('yyyy-MM-dd').format(startDate!),
-      'date_end': DateFormat('yyyy-MM-dd').format(endDate!),
+      'date_start': formatCustomDateTime(startDate!), // Użycie nowej funkcji
+      'date_end': formatCustomDateTime(endDate!),     // Użycie nowej funkcji
       'user_id': userId
     });
 
