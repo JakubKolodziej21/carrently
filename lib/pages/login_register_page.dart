@@ -1,7 +1,6 @@
 import 'package:carrently/auth.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({Key? key}) : super(key: key);
@@ -49,6 +48,26 @@ class _LoginPageState extends State<LoginPage> {
     try {
       await FirebaseAuth.instance.sendPasswordResetEmail(email: email);
       _showMessageDialog('Wysłano e-mail z resetowaniem hasła.');
+    } on FirebaseAuthException catch (e) {
+      setState(() {
+        errorMessage = getFirebaseErrorMessage(e.code);
+      });
+      _showErrorDialog();
+    }
+  }
+
+  Future<void> signInWithGoogle() async {
+    try {
+      User? user = await Auth().signInWithGoogle();
+      if (user != null) {
+        print('Zalogowano jako: ${user.displayName}');
+        // Możesz tutaj przekierować użytkownika do innej strony lub zaktualizować interfejs
+      } else {
+        setState(() {
+          errorMessage = 'Logowanie nie powiodło się';
+        });
+        _showErrorDialog();
+      }
     } on FirebaseAuthException catch (e) {
       setState(() {
         errorMessage = getFirebaseErrorMessage(e.code);
@@ -184,70 +203,87 @@ class _LoginPageState extends State<LoginPage> {
         ),
         child: const Text(
           'Zapomniałeś hasła?',
-          style: const TextStyle(fontSize: 14),
+          style: TextStyle(fontSize: 14),
         ),
       ),
     );
   }
 
-@override
-Widget build(BuildContext context) {
-  return Scaffold(
-    appBar: AppBar(
-      title: _title(),
-    ),
-    body: SingleChildScrollView(  
-      child: Container(
-        height: MediaQuery.of(context).size.height, 
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            colors: [Color.fromARGB(255, 110, 179, 236), Colors.lightBlueAccent],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-        ),
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Image.asset(
-              'assets/images/logo_white.png',
-              height: 300,
-            ),
-            const SizedBox(height: 20),
-            _entryField('E-mail', _controllerEmail),
-            const SizedBox(height: 10),
-            _entryPasswordField('Hasło', _controllerPassword),
-            const SizedBox(height: 8),
-            _resetPasswordButton(),
-            const SizedBox(height: 20),
-            _submitButton(),
-            const SizedBox(height: 10),
-            _loginOrRegisterButton(),
-          ],
+  Widget _googleSignInButton() {
+    return ElevatedButton(
+      onPressed: signInWithGoogle,
+      style: ElevatedButton.styleFrom(
+        foregroundColor: Colors.white,
+        backgroundColor: const Color.fromARGB(255, 243, 163, 33),
+        padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 30),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(30),
         ),
       ),
-    ),
-  );
-}
-
-String getFirebaseErrorMessage(String errorCode) {
-  switch (errorCode) {
-    case 'user-not-found':
-      return 'Nie znaleziono użytkownika dla podanego adresu e-mail';
-    case 'wrong-password':
-      return 'Nieprawidłowe hasło';
-    case 'email-already-in-use':
-      return 'Adres e-mail jest już używany';
-    case 'invalid-email':
-      return 'Nieprawidłowy format adresu e-mail';
-    case 'operation-not-allowed':
-      return 'Ta operacja nie jest dozwolona';
-    case 'weak-password':
-      return 'Hasło jest zbyt słabe';
-    default:
-      return 'Wystąpił nieznany błąd. Spróbuj ponownie później.';
+      child: const Text('Zaloguj się przez Google'),
+    );
   }
-}
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: _title(),
+      ),
+      body: SingleChildScrollView(  
+        child: Container(
+          height: MediaQuery.of(context).size.height, 
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Color.fromARGB(255, 110, 179, 236), Colors.lightBlueAccent],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+          ),
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              Image.asset(
+                'assets/images/logo_white.png',
+                height: 300,
+              ),
+              const SizedBox(height: 20),
+              _entryField('E-mail', _controllerEmail),
+              const SizedBox(height: 10),
+              _entryPasswordField('Hasło', _controllerPassword),
+              const SizedBox(height: 8),
+              _resetPasswordButton(),
+              const SizedBox(height: 20),
+              _submitButton(),
+              const SizedBox(height: 10),
+              _googleSignInButton(), // Dodany przycisk logowania przez Google
+              const SizedBox(height: 10),
+              _loginOrRegisterButton(),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  String getFirebaseErrorMessage(String errorCode) {
+    switch (errorCode) {
+      case 'user-not-found':
+        return 'Nie znaleziono użytkownika dla podanego adresu e-mail';
+      case 'wrong-password':
+        return 'Nieprawidłowe hasło';
+      case 'email-already-in-use':
+        return 'Adres e-mail jest już używany';
+      case 'invalid-email':
+        return 'Nieprawidłowy format adresu e-mail';
+      case 'operation-not-allowed':
+        return 'Ta operacja nie jest dozwolona';
+      case 'weak-password':
+        return 'Hasło jest zbyt słabe';
+      default:
+        return 'Wystąpił nieznany błąd. Spróbuj ponownie później.';
+    }
+  }
 }
