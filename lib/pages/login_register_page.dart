@@ -210,17 +210,11 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   Widget _googleSignInButton() {
-    return ElevatedButton(
-      onPressed: signInWithGoogle,
-      style: ElevatedButton.styleFrom(
-        foregroundColor: Colors.white,
-        backgroundColor: const Color.fromARGB(255, 243, 163, 33),
-        padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 30),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(30),
-        ),
+    return GestureDetector(
+      onTap: signInWithGoogle,
+         child: Image.asset(
+        'assets/images/google_login_button.png'
       ),
-      child: const Text('Zaloguj się przez Google'),
     );
   }
 
