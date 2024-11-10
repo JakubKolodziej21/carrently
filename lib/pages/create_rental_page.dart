@@ -3,7 +3,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:timezone/timezone.dart' as tz;
 import 'package:timezone/data/latest.dart' as tz;
 
 void main() {
@@ -12,9 +11,11 @@ void main() {
 }
 
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return const MaterialApp(
       home: CreateRentalScreen(),
     );
   }
@@ -22,7 +23,7 @@ class MyApp extends StatelessWidget {
 
 /// Screen to create a rental, allowing the user to select a car and rental period.
 class CreateRentalScreen extends StatefulWidget {
-  const CreateRentalScreen({Key? key}) : super(key: key);
+  const CreateRentalScreen({super.key});
 
   @override
   _CreateRentalScreenState createState() => _CreateRentalScreenState();

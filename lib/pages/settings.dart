@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 /// SettingsScreen displays various user settings options, including language,
 /// sound, notifications, privacy, security, and logout.
 class SettingsScreen extends StatelessWidget {
+  const SettingsScreen({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(

@@ -97,11 +97,11 @@ class _WelcomePageState extends State<WelcomePage> {
                   width: double.infinity,
                   child: ElevatedButton(
                     style: ButtonStyle(
-                      backgroundColor: MaterialStateProperty.all<Color>(const Color(0xFFD66853)),
-                      padding: MaterialStateProperty.all(
+                      backgroundColor: WidgetStateProperty.all<Color>(const Color(0xFFD66853)),
+                      padding: WidgetStateProperty.all(
                         const EdgeInsets.symmetric(vertical: 12.0),
                       ),
-                      shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                      shape: WidgetStateProperty.all<RoundedRectangleBorder>(
                         RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10),
                         ),
