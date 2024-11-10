@@ -121,7 +121,7 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   Widget _title() {
-    return Text(isLogin ? 'Logowanie' : 'Rejestracja');
+    return Text(isLogin ? 'Logowanie' : 'Rejestracja',style: TextStyle(color: Colors.blueAccent),);
   }
 
   Widget _entryField(String title, TextEditingController controller) {
