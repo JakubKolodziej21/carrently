@@ -2,6 +2,7 @@ import 'package:carrently/auth.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
+/// LoginPage widget allows users to sign in, register, and reset their password.
 class LoginPage extends StatefulWidget {
   const LoginPage({Key? key}) : super(key: key);
 
@@ -16,6 +17,7 @@ class _LoginPageState extends State<LoginPage> {
   final TextEditingController _controllerEmail = TextEditingController();
   final TextEditingController _controllerPassword = TextEditingController();
 
+  /// Signs in the user with email and password using Firebase authentication.
   Future<void> signInWithEmailAndPassword() async {
     try {
       await Auth().signInWithEmailAndPassword(
@@ -30,6 +32,7 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
+  /// Registers a new user with email and password using Firebase authentication.
   Future<void> createUserWithEmailAndPassword() async {
     try {
       await Auth().createUserWithEmailAndPassword(
@@ -44,6 +47,7 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
+  /// Sends a password reset email to the user if they have forgotten their password.
   Future<void> sendPasswordResetEmail(String email) async {
     try {
       await FirebaseAuth.instance.sendPasswordResetEmail(email: email);
@@ -56,12 +60,13 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
+  /// Signs in the user with Google account using Firebase authentication.
   Future<void> signInWithGoogle() async {
     try {
       User? user = await Auth().signInWithGoogle();
       if (user != null) {
         print('Zalogowano jako: ${user.displayName}');
-        // Możesz tutaj przekierować użytkownika do innej strony lub zaktualizować interfejs
+        // Optional: redirect the user to another screen or update the UI
       } else {
         setState(() {
           errorMessage = 'Logowanie nie powiodło się';
@@ -76,6 +81,7 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
+  /// Displays an error dialog with the current error message.
   void _showErrorDialog() {
     if (errorMessage == null || errorMessage!.isEmpty) {
       return;
@@ -102,6 +108,7 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
+  /// Displays an informational dialog with a custom message.
   void _showMessageDialog(String message) {
     showDialog(
       context: context,
@@ -120,10 +127,15 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
+  /// Widget that displays either "Logowanie" or "Rejestracja" based on the mode.
   Widget _title() {
-    return Text(isLogin ? 'Logowanie' : 'Rejestracja',style: TextStyle(color: Colors.blueAccent),);
+    return Text(
+      isLogin ? 'Logowanie' : 'Rejestracja',
+      style: const TextStyle(color: Colors.blueAccent),
+    );
   }
 
+  /// Entry field widget for entering email or password.
   Widget _entryField(String title, TextEditingController controller) {
     return TextField(
       controller: controller,
@@ -139,6 +151,7 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
+  /// Entry field widget for entering password with obscured text.
   Widget _entryPasswordField(String title, TextEditingController controller) {
     return TextField(
       controller: controller,
@@ -155,6 +168,7 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
+  /// Submit button widget that either logs in or registers the user based on the mode.
   Widget _submitButton() {
     return ElevatedButton(
       onPressed: isLogin ? signInWithEmailAndPassword : createUserWithEmailAndPassword,
@@ -170,6 +184,7 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
+  /// Button to toggle between login and registration modes.
   Widget _loginOrRegisterButton() {
     return TextButton(
       onPressed: () {
@@ -184,6 +199,7 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
+  /// Button to reset the user's password.
   Widget _resetPasswordButton() {
     return Align(
       alignment: Alignment.centerRight,
@@ -209,12 +225,11 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
+  /// Google sign-in button with a custom image.
   Widget _googleSignInButton() {
     return GestureDetector(
       onTap: signInWithGoogle,
-         child: Image.asset(
-        'assets/images/google_login_button.png'
-      ),
+      child: Image.asset('assets/images/google_login_button.png'),
     );
   }
 
@@ -224,9 +239,9 @@ class _LoginPageState extends State<LoginPage> {
       appBar: AppBar(
         title: _title(),
       ),
-      body: SingleChildScrollView(  
+      body: SingleChildScrollView(
         child: Container(
-          height: MediaQuery.of(context).size.height, 
+          height: MediaQuery.of(context).size.height,
           decoration: const BoxDecoration(
             gradient: LinearGradient(
               colors: [Color.fromARGB(255, 110, 179, 236), Colors.lightBlueAccent],
@@ -252,7 +267,7 @@ class _LoginPageState extends State<LoginPage> {
               const SizedBox(height: 20),
               _submitButton(),
               const SizedBox(height: 10),
-              _googleSignInButton(), // Dodany przycisk logowania przez Google
+              _googleSignInButton(),
               const SizedBox(height: 10),
               _loginOrRegisterButton(),
             ],
@@ -262,6 +277,7 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
+  /// Maps Firebase error codes to user-friendly messages in Polish.
   String getFirebaseErrorMessage(String errorCode) {
     switch (errorCode) {
       case 'user-not-found':

@@ -2,6 +2,7 @@ import 'package:carrently/widget_tree.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+/// A welcome page that displays a background image, app title, and a login button.
 class WelcomePage extends StatefulWidget {
   const WelcomePage({Key? key, required this.title}) : super(key: key);
 
@@ -18,7 +19,7 @@ class _WelcomePageState extends State<WelcomePage> {
 
     return Scaffold(
       body: Container(
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           gradient: LinearGradient(
             colors: [
               Color(0xFFFFFFFF),
@@ -28,16 +29,17 @@ class _WelcomePageState extends State<WelcomePage> {
         ),
         child: Stack(
           children: [
+            // Background image at the top section of the screen
             Align(
               alignment: Alignment.topCenter,
               child: ClipRRect(
-                borderRadius: BorderRadius.only(
+                borderRadius: const BorderRadius.only(
                   bottomLeft: Radius.circular(17),
                   bottomRight: Radius.circular(17),
                 ),
                 child: Container(
                   height: screenHeight * 0.6, // 60% of the screen height
-                  decoration: BoxDecoration(
+                  decoration: const BoxDecoration(
                     image: DecorationImage(
                       image: AssetImage('assets/images/background_image.jpg'),
                       fit: BoxFit.cover,
@@ -46,19 +48,22 @@ class _WelcomePageState extends State<WelcomePage> {
                 ),
               ),
             ),
+            // Logo and app title in the center
             Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
-                  Container(
-                    child: Image.asset('assets/images/logo_white.png', height: 300, width: 300), // Adjust height and width as needed
+                  Image.asset(
+                    'assets/images/logo_white.png',
+                    height: 300,
+                    width: 300,
                   ),
-                  SizedBox(height: 30),
+                  const SizedBox(height: 30),
                   Column(
                     children: [
-                      Text(
+                      const Text(
                         'Witaj w aplikacji,',
-                        style: TextStyle(fontWeight:FontWeight.w600,fontSize: 30),
+                        style: TextStyle(fontWeight: FontWeight.w600, fontSize: 30),
                       ),
                       Text.rich(
                         TextSpan(
@@ -67,9 +72,9 @@ class _WelcomePageState extends State<WelcomePage> {
                               text: 'Car',
                               style: GoogleFonts.lato(fontSize: 48, color: Colors.black87),
                             ),
-                            TextSpan(
+                            const TextSpan(
                               text: 'Rently',
-                              style: TextStyle(fontSize: 48,  color: Colors.blue),
+                              style: TextStyle(fontSize: 48, color: Colors.blue),
                             ),
                           ],
                         ),
@@ -79,25 +84,26 @@ class _WelcomePageState extends State<WelcomePage> {
                 ],
               ),
             ),
+            // Login button positioned at the bottom
             Positioned(
               left: 0,
               right: 0,
               bottom: 60,
               child: Container(
                 alignment: Alignment.center,
-                margin: const EdgeInsets.only(left: 40.0, right: 40.0),
+                margin: const EdgeInsets.symmetric(horizontal: 40.0),
                 child: SizedBox(
                   height: 60,
                   width: double.infinity,
                   child: ElevatedButton(
                     style: ButtonStyle(
-                      backgroundColor: MaterialStateProperty.all<Color>(Color(0xFFD66853)),
+                      backgroundColor: MaterialStateProperty.all<Color>(const Color(0xFFD66853)),
                       padding: MaterialStateProperty.all(
-                        const EdgeInsets.only(top: 12.0, bottom: 12.0),
+                        const EdgeInsets.symmetric(vertical: 12.0),
                       ),
                       shape: MaterialStateProperty.all<RoundedRectangleBorder>(
                         RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10), // 17% of 50 is approximately 8.5
+                          borderRadius: BorderRadius.circular(10),
                         ),
                       ),
                     ),

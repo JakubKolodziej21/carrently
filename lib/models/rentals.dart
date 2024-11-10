@@ -1,3 +1,4 @@
+/// Represents a rental record with details including car ID, rental start and end dates, and user ID.
 class Rental {
   final String carId;
   final String dateStart;
@@ -11,7 +12,7 @@ class Rental {
     required this.userId,
   });
 
-  // Metoda factory do tworzenia instancji klasy Rental z danych dokumentu Firestore
+  /// Factory method to create an instance of Rental from Firestore document data.
   factory Rental.fromFirestore(Map<String, dynamic> data) {
     return Rental(
       carId: data['car_id'],
@@ -21,7 +22,7 @@ class Rental {
     );
   }
 
-  // Metoda do generowania mapy danych, przydatna przy zapisywaniu danych do Firestore
+  /// Converts the Rental instance into a map, useful for saving data to Firestore.
   Map<String, dynamic> toMap() {
     return {
       'car_id': carId,

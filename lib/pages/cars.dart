@@ -3,6 +3,7 @@ import 'package:carrently/services/firestrore_service.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 
+/// A screen displaying a list of available cars for rental.
 class CarsListScreen extends StatelessWidget {
   final FirestoreService _firestoreService = FirestoreService();
 
@@ -11,9 +12,10 @@ class CarsListScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text(
+      appBar: AppBar(
+        title: const Text(
           'Lista samochodów',
-          style: TextStyle(color: Colors.blueAccent), // Kolor tytułu
+          style: TextStyle(color: Colors.blueAccent), // Title color
         ),
         backgroundColor: const Color.fromARGB(255, 255, 255, 255),
         actions: [
@@ -21,7 +23,7 @@ class CarsListScreen extends StatelessWidget {
             icon: const Icon(Icons.search),
             color: Colors.blueAccent,
             onPressed: () {
-              // Dodaj funkcjonalność wyszukiwania
+              // Add search functionality
             },
           ),
         ],
@@ -61,7 +63,7 @@ class CarsListScreen extends StatelessWidget {
                   child: Column(
                     children: [
                       ClipRRect(
-                        borderRadius: BorderRadius.vertical(top: Radius.circular(15)),
+                        borderRadius: const BorderRadius.vertical(top: Radius.circular(15)),
                         child: FutureBuilder(
                           future: _getImageUrl(car.thumbnailImage),
                           builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
@@ -134,7 +136,7 @@ class CarsListScreen extends StatelessWidget {
                                 IconButton(
                                   icon: const Icon(Icons.directions_car),
                                   onPressed: () {
-                                    // Dodaj funkcjonalność wypożyczania
+                                    // Add rental functionality
                                   },
                                 ),
                               ],
@@ -153,6 +155,7 @@ class CarsListScreen extends StatelessWidget {
     );
   }
 
+  /// Creates a row displaying a car detail with an icon and text.
   Row _carDetailRow(IconData icon, String text) {
     return Row(
       children: [
@@ -163,6 +166,7 @@ class CarsListScreen extends StatelessWidget {
     );
   }
 
+  /// Retrieves the URL of the car's thumbnail image from Firebase Storage.
   Future<String> _getImageUrl(String imagePath) async {
     try {
       final ref = FirebaseStorage.instance.ref().child(imagePath);

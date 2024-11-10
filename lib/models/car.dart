@@ -1,5 +1,6 @@
 import 'package:firebase_storage/firebase_storage.dart';
 
+/// Represents a car with various attributes, including brand, cost, location, and more.
 class Car {
   final String id;
   final String brand;
@@ -41,6 +42,7 @@ class Car {
     required this.year,
   });
 
+  /// Creates a Car object from a map of data, handling nulls and parsing values.
   factory Car.fromMap(Map<String, dynamic> data, String id) {
     return Car(
       id: id,
@@ -64,6 +66,7 @@ class Car {
     );
   }
 
+  /// Retrieves the URL of the car's thumbnail image from Firebase Storage.
   Future<String> getThumbnailUrl() async {
     try {
       final ref = FirebaseStorage.instance.ref().child(thumbnailImage);
@@ -71,7 +74,7 @@ class Car {
       return url;
     } catch (e) {
       print("Failed to load image URL: $e");
-      return '';  // Można zwrócić pusty string jako fallback
+      return '';  // Returns an empty string as a fallback
     }
   }
 }

@@ -4,6 +4,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:timezone/data/latest.dart' as tz; 
 
+/// Main function to initialize Firebase, time zones, and run the app.
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   String? firebaseError;
@@ -21,6 +22,7 @@ void main() async {
   runApp(MyApp(firebaseError: firebaseError));
 }
 
+/// Root widget for the application.
 class MyApp extends StatelessWidget {
   final String? firebaseError;
 
@@ -33,11 +35,14 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.orange,
       ),
-      home: firebaseError != null ? ErrorScreen(error: firebaseError!) : const WidgetTree(),
+      home: firebaseError != null 
+          ? ErrorScreen(error: firebaseError!) 
+          : const WidgetTree(),
     );
   }
 }
 
+/// Screen displayed when Firebase initialization fails, showing the error message.
 class ErrorScreen extends StatelessWidget {
   final String error;
 
